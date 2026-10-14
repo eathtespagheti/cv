@@ -71,6 +71,10 @@ FROM nginxinc/nginx-unprivileged:1.27-alpine AS runtime
 
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Shared `add_header` snippet that nginx.conf `include`s in every context that
+# sets a header of its own (the server block and the two cache locations).
+# It must sit outside conf.d/ — a file there is loaded as a config fragment.
+COPY nginx-security-headers.conf /etc/nginx/snippets/security-headers.conf
 
 EXPOSE 8080
 
