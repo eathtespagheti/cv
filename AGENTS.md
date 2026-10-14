@@ -24,6 +24,12 @@ public/media/projects/   │                  ├─► public/downloads/ → re
 cover-letters/           ┘                  └─► OG image
 ```
 
+**Two layers.** The **authored** CV is `src/content/cv/{lang}.yaml` (plus optional
+`{lang}_{spec}.yaml` deltas). `cv:build` merges those with `profiles.yml` into the
+**generated**, gitignored `public/cv/` artifact, and every consumer — pages, PDF,
+DOCX, TXT, OG image — reads *that* artifact, never the authored source directly. Edit
+the authored source; the artifact is rebuilt.
+
 `npm run build` is five steps, not just `astro build`:
 
 1. `cv:build` — merges profiles into `public/cv/`
@@ -40,7 +46,7 @@ when touching content formatting.
 
 | File | Purpose |
 |---|---|
-| `src/content/cv/en.yaml` | **The CV.** Everything on the site comes from here |
+| `src/content/cv/en.yaml` | **The CV's authored source.** `cv:build` merges it into the generated, gitignored `public/cv/`, which the pages and the PDF/DOCX/TXT exporters actually read |
 | `src/content/profiles/profiles.yml` | Profile registry — currently one profile only |
 | `src/content/projects/projects_en.yaml` | Project cards on `/projects` |
 | `public/media/projects/<slug>/<slug>_en.yaml` | Per-project case-study pages |

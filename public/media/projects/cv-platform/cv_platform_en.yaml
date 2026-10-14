@@ -12,7 +12,7 @@ blocks:
   - type: text
     title: "Overview"
     body: |
-      This site, the résumé it links to and the cover letters I send all come from the same place. A single `src/content/cv/en.yaml` describes the CV; the build turns it into the portfolio pages, a two-column recruiter PDF, a single-column ATS-safe PDF, an editable DOCX and a plain-text résumé.
+      This site, the résumé it links to and the cover letters I send all come from the same place. A single authored `src/content/cv/en.yaml` describes the CV. The build merges it, the profile registry and the language list into a generated `public/cv/` artifact — the same one the pages and the document exporters read — and from that artifact produces the portfolio pages, a two-column recruiter PDF, a single-column ATS-safe PDF, an editable DOCX and a plain-text résumé.
 
       The point is to stop maintaining the same facts in five documents. When something changes — a new role, a reworded bullet, a corrected date — it changes once, and every output is rebuilt from it.
 
