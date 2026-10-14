@@ -12,7 +12,7 @@ blocks:
   - type: text
     title: "Panoramica"
     body: |
-      Questo sito, il CV a cui rimanda e le cover letter che invio vengono tutti dallo stesso posto. Un unico `src/content/cv/en.yaml` descrive il CV; la build lo trasforma nelle pagine del portfolio, in un PDF per recruiter a due colonne, in un PDF ATS-safe a una colonna, in un DOCX modificabile e in un CV in testo semplice.
+      Questo sito, il CV a cui rimanda e le cover letter che invio vengono tutti dallo stesso posto. Un unico `src/content/cv/en.yaml` è la fonte del CV. La build lo unisce insieme al registro dei profili e all'elenco delle lingue in un artefatto generato in `public/cv/` — lo stesso che leggono le pagine e gli exporter dei documenti — e da quell'artefatto produce le pagine del portfolio, un PDF per recruiter a due colonne, un PDF ATS-safe a una colonna, un DOCX modificabile e un CV in testo semplice.
 
       Lo scopo è smettere di mantenere gli stessi fatti in cinque documenti. Quando qualcosa cambia — un nuovo ruolo, un bullet riformulato, una data corretta — cambia una volta sola, e ogni output viene ricostruito da lì.
 

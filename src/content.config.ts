@@ -72,6 +72,14 @@ const cvProjectSchema = z.object({
   private: z.boolean().optional().default(false),
 });
 
+// The CV's authored source: `src/content/cv/*.yaml` — a base per language plus
+// optional `{lang}_{spec}.yaml` deltas. No page queries this collection by id;
+// pages and the document exporters read the merged, gitignored `public/cv/`
+// artifact that `cv:build` (src/scripts/merge.mjs) writes. But Astro loads and
+// validates *every* defined collection on build, so this schema is the gate
+// that fails CI on a malformed CV YAML entry (see .gitlab-ci.yml, and "validated
+// on build" in AGENTS.md/README). It looks unused and is not — do not delete it
+// as dead code without replacing that validation.
 const cv = defineCollection({
   loader: glob({ pattern: '*.{yaml,yml}', base: './src/content/cv' }),
   schema: z.object({
