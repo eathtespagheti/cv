@@ -65,6 +65,10 @@ COPY . .
 
 RUN npm run astro -- build
 RUN npm run og:generate
+# `astro build` copies `public/` verbatim, so the YAML the build reads as input
+# (public/cv/*.yaml, public/media/projects/**/*.yaml) lands in dist/ too. Nothing
+# served links to it — prune it so it does not ship in the image.
+RUN npm run prune:dist
 
 # ---- Serve the static output --------------------------------------------------
 FROM nginxinc/nginx-unprivileged:1.27-alpine AS runtime

@@ -18,7 +18,9 @@
     "resume:linkedin": "node src/scripts/resume-import-linkedin.mjs",
     "resume:import:all": "node src/scripts/resume-import-json.mjs docs/cv_en.json en && node src/scripts/resume-import-json.mjs docs/cv_ru.json ru",
     "og:generate": "node src/scripts/generate-og-image.mjs",
-    "build": "npm run cv:build && npm run resume:generate && npm run resume:pdf && astro build && npm run og:generate",
+    "prune:dist": "node src/scripts/prune-dist.ts",
+    "check:dist": "node src/scripts/prune-dist.ts --check",
+    "build": "npm run cv:build && npm run resume:generate && npm run resume:pdf && astro build && npm run og:generate && npm run prune:dist",
     "letter": "node cover-letters/render.mjs",
     "letter:all": "node cover-letters/render.mjs --all"
   },
