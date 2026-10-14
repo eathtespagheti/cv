@@ -35,6 +35,8 @@ validate:
     - npm test
     - npx playwright install --with-deps chromium
     - npm run build
+    # Guard: no build-time YAML may survive into a built dist/ (see ticket #4).
+    - npm run check:dist
     # Fail loudly if the cover letter generator is broken.
     - npm run letter -- example
   artifacts:

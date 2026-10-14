@@ -24,13 +24,16 @@ public/media/projects/   │                  ├─► public/downloads/ → re
 cover-letters/           ┘                  └─► OG image
 ```
 
-`npm run build` is five steps, not just `astro build`:
+`npm run build` is six steps, not just `astro build`:
 
 1. `cv:build` — merges profiles into `public/cv/`
 2. `resume:generate` — DOCX + TXT
 3. `resume:pdf` — recruiter PDF + ATS-safe PDF via Playwright
 4. `astro build` — the static site
 5. `og:generate` — social preview image
+6. `prune:dist` — strips the build-time YAML (CV + case studies) that
+   `astro build` copied verbatim out of `public/`, so it never ships. The same
+   step runs in the Dockerfile; CI's `npm run check:dist` fails if any survives.
 
 `npm test` runs the browser-free regression tests (Node's built-in runner, no
 framework dependency) and is part of the CI validate gate. Run it before a build
