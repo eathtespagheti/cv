@@ -1,0 +1,77 @@
+title: "octopus-prices"
+role: "Autore / Operatore"
+year: "2026 — presente"
+tagline: "Un price tracker Kubernetes impacchettato con Helm e un bot Telegram che tiene d'occhio le tariffe di Octopus Energy Italia e avvisa gli iscritti quando un prezzo cambia."
+shareable: true
+
+platforms: [Kubernetes, Telegram]
+stack: [Helm, Kubernetes, GitLab CI/CD, Shell (POSIX sh), jq, kubectl, Telegram Bot API]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      Tengo d'occhio le offerte di elettricità che mi interessano, così ho costruito qualcosa che le controlla per me. `octopus-prices` è un piccolo servizio che fa scraping della pagina pubblica delle tariffe di Octopus Energy Italia ogni ora e, ogni volta che un prezzo dell'elettricità cambia, fa due cose: pubblica il listino completo su un canale Telegram pubblico e manda un DM agli iscritti che hanno chiesto di essere avvisati quando la tariffa *Octopus Fissa 12M* scende sotto una soglia che hanno scelto.
+
+      Il tutto è distribuito come chart Helm e gira come normali oggetti Kubernetes - un `CronJob`, `Job` di breve durata e un `Deployment` sempre attivo. Non c'è nessuna immagine container custom, nessun database e nessun ingress.
+
+  - type: divider
+
+  - type: image
+    src: /media/projects/octopus-prices/channel-chat.jpg
+    alt: "Il canale Telegram pubblico che riceve un listino Octopus Energy aggiornato e un pulsante verso il bot degli avvisi"
+    caption: "A ogni cambiamento il canale riceve il nuovo listino e un pulsante verso il bot degli avvisi."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "Come funziona"
+    body: |
+      Un `CronJob` esegue lo scraper ogni ora. Lo script scarica la pagina delle tariffe, estrae il payload JSON `__NEXT_DATA__` dall'HTML con `awk` e `sed` e lo riduce con `jq` alle sole offerte di elettricità e al loro prezzo di consumo. Lo confronta con l'ultimo snapshot salvato in un ConfigMap; se non è cambiato nulla, esce in modo pulito.
+
+      Quando qualcosa è cambiato, lo scraper riscrive il nuovo snapshot nel ConfigMap e avvia due `Job` Kubernetes da template di pod renderizzati con `envsubst` - uno pubblica il listino sul canale, l'altro scorre le soglie nel ConfigMap `alerts-config` e manda un DM agli utenti il cui prezzo è stato raggiunto. Gli avvisi sono one-shot: una volta che una soglia scatta viene rimossa, così nessuno riceve messaggi ogni ora finché un prezzo resta basso.
+
+  - type: divider
+
+  - type: text
+    title: "Gli oggetti Kubernetes come unico stato"
+    body: |
+      Non c'è nessun database e nessun servizio esterno. Lo snapshot dei prezzi, l'id dell'ultimo messaggio promo del canale e la mappa di sottoscrizione `threshold -> chat ids` vivono tutti in ConfigMap, creati e aggiornati dagli script tramite l'API Kubernetes.
+
+      Il bot stesso è un `Deployment` sempre attivo che fa long-polling dell'endpoint `getUpdates` di Telegram e gestisce `/track`, `/untrack`, `/stop`, `/start` e `/help`, oltre alle callback della inline keyboard. È scritto deliberatamente senza `set -e` così un errore di rete transitorio non manda in crash il pod, e avanza l'offset degli update prima di elaborare ogni messaggio così un singolo update difettoso non può bloccare il loop.
+
+      Il chart include un `ServiceAccount` dedicato legato a un `Role` con namespace che concede solo `create/get/list/delete` su `batch/jobs` e `create/get/list/update/patch` sui ConfigMap - nessun permesso a livello di cluster. I container girano come utente non-root con tutte le capabilities rimosse e la privilege escalation disabilitata.
+
+  - type: divider
+
+  - type: text
+    title: "Packaging e CI"
+    body: |
+      Il chart è tipizzato: `values.schema.json` valida la configurazione al momento dell'installazione. Gli script e i template dei Job a runtime sono distribuiti come ConfigMap generati da Helm tramite `.Files.Get`, così cambiare uno script è un cambiamento del chart invece di una ricompilazione dell'immagine.
+
+      GitLab CI fa il lint del chart (`helm lint` più asserzioni `helm template` sui manifest renderizzati) e degli script shell con ShellCheck su ogni branch, e su un tag di versione impacchetta il chart e lo pusha su un registry Helm OCI - così si installa con un singolo `helm install oci://...`.
+
+  - type: divider
+
+  - type: text
+    title: "Il bot e il canale"
+    body: |
+      Gli screenshot sono reali: l'iscrizione a un avviso di prezzo con `/track`, e il profilo del canale pubblico su cui viene pubblicato il listino.
+
+  - type: image
+    src: /media/projects/octopus-prices/bot-chat.jpg
+    alt: "Iscrizione a un avviso di prezzo scrivendo al bot Telegram"
+    natural: true
+
+  - type: image
+    src: /media/projects/octopus-prices/channel.jpg
+    alt: "Profilo del canale Telegram pubblico Prezzi Octopus"
+    natural: true
+
+links:
+  - label: Sorgente
+    url: https://gitlab.com/eathtespagheti/octopus-prices
+  - label: Bot Telegram
+    url: https://t.me/PrezziOctopusBot

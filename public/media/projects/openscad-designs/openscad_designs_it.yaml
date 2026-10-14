@@ -1,0 +1,39 @@
+title: "OpenSCAD Designs"
+role: "Autore"
+year: "2020"
+tagline: "Una raccolta di sorgenti OpenSCAD parametrici per parti stampabili in 3D — tappi per bottiglie, prolunghe per manubri, supporti LED e supporti ammortizzatore — dove il file sorgente è il modello."
+shareable: true
+
+platforms: [Stampa 3D]
+stack: [OpenSCAD]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      Una piccola raccolta di parti pratiche che mi servivano e per cui non trovavo un buon modello, scritte in OpenSCAD invece che esportate da un editor di mesh. Per le parti stampate la differenza conta: un sorgente parametrico si può rimisurare e ricalcolare quando una dimensione risulta leggermente sbagliata, mentre un STL è congelato.
+
+      Ogni parte è un file `.scad` autosufficiente con dimensioni e tolleranze con un nome in cima, così sistemare un incastro è modificare una costante anziché rifare la geometria.
+
+  - type: divider
+
+  - type: text
+    title: "I modelli"
+    body: |
+      - **Tappo per bottiglia** — un coperchio a scatto generato insieme a un pezzo di prova su misura, così la tolleranza si può tarare prima di stampare la parte vera.
+      - **Prolunga per manubrio** — una prolunga per un manubrio standard da 22,2 mm, con un diametro interno volutamente stretto perché non scivoli.
+      - **Supporto LED** — un supporto da manubrio per una luce, con filetto M3 e sede del dado modellati direttamente nel connettore.
+      - **Supporto ammortizzatore** — un supporto a boccola con diametri esterni e interni separati, dimensionato sull'hardware misurato.
+
+  - type: divider
+
+  - type: text
+    title: "Mantenere i sorgenti usabili"
+    body: |
+      Il repository è organizzato come un piccolo workspace OpenSCAD invece che come una cartella di file sparsi: una configurazione `.clang-format` e un piccolo script di formattazione mantengono i sorgenti formattati in modo coerente, e i task e le impostazioni di VS Code sono versionati così rendering e formattazione sono un comando ciascuno.
+
+links:
+  - label: Sorgente
+    url: https://gitlab.com/eathtespagheti/openscad-designs
+    type: repo

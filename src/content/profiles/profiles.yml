@@ -1,0 +1,14 @@
+# One profile. A second "senior" variant was tried and removed: it overrode only
+# the title, summary and achievements, so switching profiles changed the header
+# and nothing else — the same page with a different first paragraph. Either keep
+# a single profile, or make additional profiles differ substantively (a real
+# Platform/SRE cut vs a DevOps/CI-CD cut), not just in framing.
+#
+# To add a profile: create `cv/<lang>_<spec>.yaml` as a delta over the base CV,
+# then add an entry here with slug === spec. The spec REPLACES the experience
+# list, so list every role you want to keep, in the order you want them.
+profiles:
+  - id: default
+    label: "DevOps / Platform"
+    slug: ""
+    spec: null

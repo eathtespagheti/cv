@@ -1,0 +1,83 @@
+title: "teslamate-fuel-roi"
+role: "Author / Operator"
+year: "2026 — present"
+tagline: "Italy's official weekly fuel prices joined to TeslaMate's trip data, turned into two Grafana dashboards that show the fuel money an EV avoids — and when it pays itself back."
+shareable: true
+
+platforms: [Kubernetes, Docker, PostgreSQL, Grafana]
+stack: [Grafana, PostgreSQL, SQL, Shell (POSIX sh), jq, curl, Docker, Docker Compose, Kubernetes, Kustomize, GitLab CI/CD, GitHub Actions, shellcheck, BuildKit]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      This started as a question I actually had: now that the car is electric, how much fuel money has it avoided, and when does that add up to the price of the car? TeslaMate already logs every drive, charge and cost — what it cannot know is what petrol or diesel would have cost on the same days. So I built the missing half and paired the two in Grafana.
+
+      One container does the whole job in a single pass. It downloads Italy's official weekly fuel-price report from MASE, validates it fail-closed, converts it to CSV, and upserts any previously unseen weeks into a `fuel.prices` table alongside my existing TeslaMate data. Two Grafana dashboards then read TeslaMate's tables and that table together: one reports gross and net fuel savings, the other tracks net savings against the EV purchase price and estimates a break-even date.
+
+      It is deliberately Italy-only. The price feed, the table schema and the dashboards all assume the Italian MASE report, and a country/provider abstraction is explicitly out of scope.
+
+  - type: image
+    src: /media/projects/teslamate-fuel-roi/ev-roi-and-break-even.png
+    alt: "The ev-roi Grafana dashboard: net savings and average weekly net savings stat panels, a break-even progress gauge, distance driven, the estimated break-even date, cumulative savings and remaining to break even, and weekly fuel, electricity and net savings timeseries"
+    caption: "The ROI dashboard — net savings, break-even progress and the estimated break-even date."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "What the dashboards show"
+    body: |
+      `ev-fuel-savings` answers the simpler half of the question: how much driving happened, how many litres of fuel that driving would have burned, and what those litres would have cost at the prices in force on each trip's date. Three stat panels give the totals — distance driven, litres avoided and gross fuel cost avoided — and a timeseries breaks the same figures down week by week, next to a fuel-price comparison so the price trend behind the savings is visible.
+
+      `ev-roi` answers the second half: does the saving pay for the car? It shows net savings in the selected range — fuel cost avoided minus charging cost — the average weekly net saving, a break-even progress gauge against the purchase price, and the estimated break-even date. Cumulative savings sit under it, with the weekly fuel, electricity and net components broken out.
+
+  - type: image
+    src: /media/projects/teslamate-fuel-roi/ev-fuel-savings.png
+    alt: "The ev-fuel-savings Grafana dashboard: distance driven, litres of fuel avoided and gross fuel cost avoided stat panels, a weekly gross and net savings timeseries, and a fuel prices comparison"
+    caption: "The savings dashboard — totals, weekly gross and net savings, and the fuel-price trend."
+
+  - type: divider
+
+  - type: text
+    title: "How the dashboards are built"
+    body: |
+      The dashboards are provision-ready JSON (Grafana schema version 42) checked into the repository, not hand-built in a running instance and exported later. Provisioning them is a matter of copying the JSON and a provider YAML into Grafana's provisioning directory; every panel queries a PostgreSQL datasource whose UID is `TeslaMate`.
+
+      Everything is driven by template variables, so one dashboard adapts without edits: `car_id` and `fuel_type` are query variables read from the database, `consumption_km_l` and `purchase_cost` are text boxes, and `purchase_cost_neg` is a hidden variable derived for the gauge. The `$__timeFilter` macro binds panels to the dashboard time range and `$__all` to the "all cars" selection.
+
+      The panels are ordinary Grafana types — `stat`, `gauge` and `timeseries` — wired to raw SQL over the TeslaMate schema. The numbers are computed in Postgres, not in the browser: common table expressions aggregate drives and charges by week, a `LEFT JOIN LATERAL` picks the fuel price in force on each trip's date, and a `FULL OUTER JOIN` lines up weeks that have fuel but no charging data, or the reverse. The `fuel_type` variable is resolved inside the query with a `CASE` expression, so switching between petrol, diesel, LPG, methane and the rest re-costs every trip without touching a panel. Formatting is part of the panels too: currency, kilometres and a localised date, with colour thresholds on the stat panels and gauge zones that turn green as savings approach the target.
+
+  - type: divider
+
+  - type: text
+    title: "The ingestion pipeline"
+    body: |
+      Feed in, prices out — and a bad feed must never overwrite good data. `fetch.sh` downloads the MASE report with `curl` under retry and timeout limits, then validates it fail-closed before writing anything: the response must parse as a non-empty JSON array, every row must carry the expected columns, the array must exceed a minimum row count, and the newest observation must be recent. Only when all of that holds does it convert the eight price columns from euro per 1000 litres to euro per litre — preserving nulls — into a temporary file and move it into place. Any failure exits non-zero and leaves the previous data untouched.
+
+      `import.sh` then makes the load idempotent. It creates the `fuel` schema and the `fuel.prices` table if they do not exist, copies the CSV into a throwaway staging table, and merges it with `INSERT ... ON CONFLICT (rilevazione) DO NOTHING` keyed on the observation date. Re-running the same week, or a report overlapping weeks already loaded, inserts only what is new. Connection details come from libpq's standard `PG*` variables, so the same script works against a local Postgres, a Compose network or a Kubernetes service.
+
+  - type: divider
+
+  - type: text
+    title: "Delivery and CI"
+    body: |
+      The image is small and runs as a non-root user: `postgres:18-alpine` plus `curl` and `jq`, with an entrypoint that runs the fetcher and then the importer, so one container is one fetch-and-import cycle. Locally that is a one-shot Compose service meant to be driven weekly by host cron or a systemd timer; in Kubernetes it is a Kustomize overlay deploying a single `CronJob` scheduled for Monday evening, after MASE publishes, with `concurrencyPolicy: Forbid` so an overrun never runs two imports at once, bounded retries and retained Job history.
+
+      Both CI platforms run the same gate: `shellcheck` over the scripts, then a test suite that starts a throwaway PostgreSQL and exercises the importer. The download tests need no network at all — they point the fetcher at local `file://` fixtures — and cover a good response, a too-short response, a stale response and a wrong-shape response, asserting that every failing case writes nothing. GitLab CI additionally builds and pushes the image to the GitLab Container Registry with rootless BuildKit on release tags, and GitHub Actions mirrors the lint-and-test job.
+
+  - type: divider
+
+  - type: text
+    title: "Scope and licence"
+    body: |
+      The project is Italy-only by design and MIT-licensed, and it is unaffiliated with TeslaMate: it reads a TeslaMate database and queries its tables, but it never modifies TeslaMate itself, and no MASE dataset is committed — the feed is fetched at runtime.
+
+links:
+  - label: Source (GitLab)
+    url: https://gitlab.com/eathtespagheti/teslamate-fuel-roi
+    type: repo
+  - label: Source (GitHub)
+    url: https://github.com/eathtespagheti/teslamate-fuel-roi
+    type: repo

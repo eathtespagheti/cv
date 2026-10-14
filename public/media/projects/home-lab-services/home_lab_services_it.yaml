@@ -1,0 +1,43 @@
+title: "Custom Images & Home Infrastructure — Progetti"
+role: "Maintainer"
+year: "2020 — presente"
+tagline: "Una lunga coda di cose che ho costruito perché dovevano funzionare."
+shareable: true
+
+platforms: [Docker, Linux]
+stack: [Docker, Linux, Shell, AUR]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      La maggior parte di ciò che costruisco, lo costruisco perché c'era qualcosa da fare. Questi sono i pezzi più piccoli di quel lavoro — pubblici su GitLab sotto `eathtespagheti`:
+
+  - type: divider
+
+  - type: text
+    title: "Immagini container personalizzate"
+    body: |
+      Immagini Docker costruite appositamente per servizi self-hosted, tra cui **Jellyfin** e **Nextcloud**. Non wrapper attorno a un'immagine upstream — immagini costruite per il deployment in cui girano davvero.
+
+  - type: divider
+
+  - type: text
+    title: "Lavoro di sistema"
+    body: |
+      - Configurazione del bootloader **rEFInd** e un **EFI shim**, per una macchina con un bootloader Linux che andava recuperata
+      - **Pacchetto AUR** per un driver di stampante a getto d'inchiostro Epson, pacchettizzato perché il produttore non lo aveva fatto
+
+  - type: divider
+
+  - type: text
+    title: "Piccole utility"
+    body: |
+      Una utility per lo spegnimento dello schermo di un notebook.
+
+      Cose piccole, ma sono gli artefatti del lavorare su Linux come sistema operativo e non solo come target di deployment.
+
+links:
+  - label: Profilo GitLab
+    url: https://gitlab.com/eathtespagheti

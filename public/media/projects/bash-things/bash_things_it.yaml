@@ -1,0 +1,59 @@
+title: "bash-things — Dotfiles multipiattaforma e automazione della shell"
+role: "Autore"
+year: "2022"
+tagline: "Un ambiente shell portabile che si configura da solo su Arch Linux e macOS."
+shareable: true
+
+platforms: [CLI, Linux, macOS]
+stack: [Bash, Zsh, Shell]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      bash-things è l'ambiente shell che uso davvero ogni giorno, confezionato in modo da poter essere installato su una macchina nuova con un solo comando. Prende di mira Arch Linux e macOS da un'unica codebase, rileva il sistema operativo host durante l'installazione e recupera i pezzi giusti per esso.
+
+      Il punto non è il prompt. Il punto è che le mie macchine sono riproducibili: alias, variabili d'ambiente, funzioni, completamenti e unità di servizio vivono nel controllo di versione invece di accumularsi a mano su ogni macchina.
+
+  - type: divider
+
+  - type: image
+    src: /media/projects/bash-things/screenshot.png
+    alt: "Il prompt di bash-things, una panoramica fastfetch e gli alias installati in un terminale"
+    caption: "Il tema del prompt, una panoramica fastfetch e l'insieme degli alias, su Arch Linux."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "Struttura"
+    body: |
+      Un piccolo installer (un one-liner con curl o wget) colloca il repository ed esegue il bootstrap specifico per il sistema operativo. Da lì un loader modulare carica i vari pezzi:
+
+      - moduli per alias, variabili, percorsi XDG, hook auto-exec e helper Docker
+      - temi del prompt per trueline e pure
+      - una directory services con unità systemd per job locali ricorrenti
+      - una directory scripts con decine di piccoli strumenti specifici per singoli compiti
+
+      Uno script di aggiornamento dedicato e un alias mantengono allineate al repository le macchine installate.
+
+  - type: divider
+
+  - type: text
+    title: "Cosa c'è nella cassetta degli attrezzi"
+    body: |
+      Gli script hanno uno scopo unico e la maggior parte è nata da un fastidio reale e ricorrente: cambio di credenziali e profili AWS, helper per Docker Compose e aggiornamenti delle immagini, conversione di media (splitting e downsampling FLAC, rotazione video, tooling Exif), copia di foto RAW, conversione di subvolume, manutenzione di remote e submodule git, elenco degli snapshot, pastebin, helper wake-on-LAN e VPN, e utility per clock e ventola della GPU.
+
+      Si presuppongono solo Bash e il tooling standard, ed è ciò che permette allo stesso albero di funzionare su Arch Linux e macOS.
+
+  - type: divider
+
+  - type: text
+    title: "Perché è qui"
+    body: |
+      È l'esempio più chiaro che ho di come trattare una workstation come infrastruttura: riproducibile, versionata e mantenuta ben oltre il punto in cui reinstallare sarebbe stato più semplice.
+
+links:
+  - label: Sorgente
+    url: https://gitlab.com/eathtespagheti/bash-things

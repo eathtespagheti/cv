@@ -1,0 +1,57 @@
+title: "Coffee Pod Funnel"
+role: "Autore"
+year: "2025"
+tagline: "Un imbuto OpenSCAD parametrico per ricaricare cialde in stile Nespresso, con collarino filettato opzionale per il macinino e una versione magnetica divisa per il caricamento senza attrezzi."
+shareable: true
+
+platforms: [Stampa 3D]
+stack: [OpenSCAD, threads-scad]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      Le cialde ricaricabili costano meno e producono meno rifiuti delle monouso, ma riempirle a mano è disordinato. `coffee-pod-funnel` è un modello OpenSCAD parametrico che tiene ferma una cialda e guida il caffè macinato dentro; nella configurazione predefinita si adatta alle cialde ricaricabili in metallo in stile Nespresso.
+
+      Ogni dimensione che conta è un parametro con un nome, non una misura fissata nel modello, perché la geometria delle cialde cambia tra le marche e anche tra i lotti: diametro del coperchio e sotto il coperchio, diametro della punta e altezza della cialda, diametro e altezza dell'imbuto, e la geometria di filetti e magneti si possono tutti cambiare e ricalcolare.
+
+  - type: image
+    src: /media/projects/coffee-pod-funnel/complete.webp
+    alt: Render esploso dell'imbuto per cialde di caffè, del suo inserto filettato per il macinino e della parte magnetica divisa con i perni di guida
+    caption: "L'inserto filettato per il macinino e la parte magnetica divisa, esplosi."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "Opzioni filettate e magnetiche"
+    body: |
+      Il modello base è un imbuto che si appoggia su una cialda. Sopra ci sono due parti opzionali, ciascuna controllata dai propri parametri:
+
+      - **Un collarino filettato** che si avvita sulla parte superiore dell'imbuto per attaccarlo direttamente a un macinino, macinando direttamente nella cialda.
+      - **Una versione divisa** in cui un accessorio per il macinino si aggancia all'imbuto con otto magneti da 6 mm e perni di guida corrispondenti, così si mette e si toglie con un solo movimento invece di svitare.
+
+      Entrambe vivono nello stesso file sorgente e si attivano tramite le loro dimensioni. I filetti veri e propri arrivano dalla libreria `threads-scad`, inclusa come sottomodulo git così il modello resta autosufficiente.
+
+  - type: image
+    src: /media/projects/coffee-pod-funnel/funnel.webp
+    alt: Imbuto per cialde di caffè assemblato con il suo collarino filettato
+    caption: "L'imbuto da solo, con il collarino filettato."
+
+  - type: image
+    src: /media/projects/coffee-pod-funnel/threaded.webp
+    alt: Accessorio filettato per il macinino dell'imbuto per cialde di caffè
+    caption: "L'accessorio filettato per il macinino."
+
+  - type: divider
+
+  - type: text
+    title: "Stamparlo"
+    body: |
+      Il modello tiene un'unica costante `FIT_TOLERANCE` da cui derivano le dimensioni di accoppiamento, così si può allentare o stringere l'incastro per una stampante specifica in un solo punto. Il README documenta tre configurazioni pronte — solo imbuto, imbuto con filetti, e inserto filettato più parte magnetica — con un render per ciascuna.
+
+links:
+  - label: Sorgente
+    url: https://gitlab.com/eathtespagheti/coffee-pod-funnel
+    type: repo

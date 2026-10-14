@@ -1,0 +1,66 @@
+title: "Workspace LLM e Agentic Coding Self-Hosted"
+role: "Architetto / Operatore"
+year: "2026 — presente"
+tagline: "Una piattaforma LLM e una toolchain di agentic coding gestite con GitOps in casa — chat, gateway compatibile OpenAI, aggregatore MCP e modelli locali dietro un unico ingress protetto da OIDC."
+shareable: true
+
+platforms: [Kubernetes, Self-hosted, AI]
+stack: [Kubernetes, Flux CD, Open WebUI, OmniRoute, MetaMCP, SearxNG, Open Terminal, Ollama, CloudNativePG, Valkey, Qdrant, Keycloak, SOPS, Cilium, OpenCode]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      Questo è lo strato LLM e agentic-coding che eseguo sopra il mio homelab Kubernetes. L'ho costruito per avere la leva dei tool AI ospitati senza rinunciare al controllo su prompt, dati e scelta del provider — e perché gestire lo stack in prima persona è il modo più rapido per capire come questi sistemi si comportano davvero.
+
+      Tutto vive nello stesso repository GitOps del resto del cluster: una modifica è un commit, Flux la riconcilia, e ogni segreto è cifrato con SOPS e age prima di arrivare in Git. L'identità è centralizzata in Keycloak, i certificati TLS sono emessi da cert-manager e tutti i sei servizi sono pubblicati tramite un unico ingress condiviso. Nulla qui è un giocattolo — è il workspace su cui sviluppo ogni giorno.
+
+  - type: divider
+
+  - type: text
+    title: "Lo stack LLM"
+    body: |
+      Lo stack è volutamente componibile, con ogni servizio che svolge un solo compito:
+
+      - **Open WebUI** — il front-end di chat, federato a Keycloak per il login OIDC e puntato su OmniRoute come backend compatibile OpenAI.
+      - **OmniRoute** — un gateway AI compatibile OpenAI. Instrada le richieste tra i provider con fallback automatico, applica la compressione dei prompt per ridurre i token, mantiene uno store di memoria su Qdrant ed espone i tool MCP.
+      - **MetaMCP** — un aggregatore e gateway MCP. Esegue diversi server MCP come processi figli e ne fa da proxy ad altri via streamable HTTP, poi li raggruppa in namespace ed endpoint, così un client vede solo i tool che servono a un dato compito.
+      - **SearxNG** — metasearch self-hosted, collegato agli agenti come tool di ricerca.
+      - **Open Terminal** — un terminale browser come companion per i lavori di lunga durata.
+      - **Ollama** — un host Linux esterno sulla LAN che esegue modelli locali, registrato in Open WebUI come backend aggiuntivo.
+
+      CloudNativePG fornisce il PostgreSQL condiviso da MetaMCP e dagli altri servizi stateful; Valkey fa da cache per lo stato del gateway e Qdrant conserva i vettori per memoria e retrieval. Database, cache e vector store sono le uniche parti persistenti, e ognuna è un workload di prima classe nel cluster, non un host gestito a mano.
+
+  - type: image
+    src: /media/projects/llm-workspace/omniroute.png
+    alt: "Dashboard di utilizzo di OmniRoute: totali di token e richieste, conteggio di provider e modelli e costo suddiviso per provider"
+    caption: "La vista di utilizzo di OmniRoute — volume di richieste, risparmio di token e costo per provider."
+    natural: true
+
+  - type: image
+    src: /media/projects/llm-workspace/mcp.png
+    alt: "Elenco dei server MCP in MetaMCP con server STDIO e streamable-HTTP, tutti senza errori"
+    caption: "L'elenco dei server in MetaMCP — server STDIO locali ed endpoint HTTP remoti, organizzati in namespace per carico di lavoro."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "Workflow di agentic coding"
+    body: |
+      Lo stack esiste per supportare come costruisco davvero il software. Il mio strumento quotidiano è **OpenCode**, e il pattern che ha fatto la differenza più grande è trattare il comportamento dell'agente come configurazione invece di sollecitarlo caso per caso:
+
+      - **Regole di progetto** in file `AGENTS.md` accanto al codice che governano, così convenzioni, comandi di build e vincoli vengono caricati automaticamente.
+      - **Skill personalizzate** che impacchettano procedure che l'agente deve seguire esattamente — per questo sito CV significa skill per scrivere il CV, redigere lettere di presentazione, valutare candidature e gestire annunci di lavoro non attendibili.
+      - **Subagenti** con permessi minimi e ambito ristretto (per esempio un docs keeper in sola lettura), così i compiti specializzati non escono dal proprio perimetro.
+      - **Workflow guidati da piani** tramite il plugin Superpowers: fare brainstorming prima di costruire, debuggare in modo sistematico, scrivere prima i test e verificare prima di dichiarare il lavoro concluso.
+
+      Lo stesso approccio è in uso negli altri miei repository, con skill e agenti su misura per il modello di deploy e i vincoli di ogni progetto. Il controllo a livello di richiesta di OmniRoute è ciò che lo rende pratico: routing, fallback e compressione si configurano una volta e valgono per ogni client e tool.
+
+  - type: divider
+
+  - type: text
+    title: "Cosa dimostra"
+    body: |
+      Costruire ed eseguire questo stack è il modo con cui resto aggiornato sul lato platform dell'AI: self-hosting di workload stateful su Kubernetes, integrazione di OIDC e TLS automatico, gestione di gateway AI e infrastruttura MCP e — soprattutto — trasformare l'agentic coding da novità a workflow di ingegneria ripetibile, con regole e skill verificabili.

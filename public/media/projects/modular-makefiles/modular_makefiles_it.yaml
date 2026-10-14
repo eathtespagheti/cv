@@ -1,0 +1,30 @@
+title: "Modular Makefiles & Build Tooling"
+role: "Autore"
+year: "2021"
+tagline: "Trasformare passaggi di build ricorrenti in pezzi componibili e versionati."
+shareable: true
+
+platforms: [CLI]
+stack: [Make, POSIX Shell, Bash]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      Una raccolta di Makefile modulari e riutilizzabili. La premessa è semplice: un passaggio di build copiato e incollato in cinque repository è cinque posti in cui correggere un bug, ed è sempre quello che dimentichi.
+
+      Dividere ogni aspetto in un proprio modulo includibile significa che una correzione arriva una volta sola e ogni consumatore la eredita.
+
+  - type: divider
+
+  - type: text
+    title: "Perché conta in pratica"
+    body: |
+      È un lavoro piccolo con un ritorno sproporzionato, ed è lo stesso istinto dietro i lavori CI/CD più grandi che ho fatto — passaggi di pipeline condivisi, step di release riutilizzabili, immagini base comuni.
+
+      La lezione ricorrente è che **la logica di build appartiene al version control come artefatto revisionabile**, non a una pagina wiki o alla memoria di chi l'ha impostata per ultimo.
+
+links:
+  - label: Sorgente
+    url: https://gitlab.com/eathtespagheti/modular-makefiles

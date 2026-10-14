@@ -1,0 +1,61 @@
+title: "AWS Services Scheduler"
+role: "Author"
+year: "2023"
+tagline: "A ready-to-ship Terraform module that powers ECS services and RDS instances on and off on a schedule."
+shareable: true
+
+platforms: [AWS, Terraform]
+stack: [Terraform, AWS Lambda, Python, boto3, EventBridge Scheduler, Amazon ECS, Amazon RDS, AWS IAM]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      AWS Services Scheduler (ASS) is a Terraform module that deploys a small
+      Python Lambda and a set of EventBridge Scheduler schedules to power AWS
+      resources on and off at chosen times. It started as a personal project —
+      a way to learn EventBridge Scheduler, and a small joke on the acronym —
+      was open-sourced, and was later adopted at work to stop non-production
+      ECS services and RDS instances running around the clock. It is designed
+      to be embedded into an existing estate rather than run as a separate
+      service.
+
+  - type: divider
+
+  - type: text
+    title: "How it works"
+    body: |
+      The module takes a single `schedules` variable: a map keyed by cron
+      expression, where each entry lists resources and the state they should be
+      in. Every schedule becomes an EventBridge schedule that invokes the Lambda,
+      which inspects the ARN of each resource and calls the matching API through
+      boto3 - `UpdateService` with a `desired_count` for ECS services, and
+      `StartDBInstance` / `StopDBInstance` for RDS instances. The module creates
+      the IAM role and policies for the scheduler and the Lambda, and derives
+      schedule names from the cron key.
+
+      The handler returns a per-resource result map - desired, pending and
+      running counts for ECS, for example - and logs each action, so scheduled
+      state changes are auditable.
+
+  - type: divider
+
+  - type: text
+    title: "Scope and trade-offs"
+    body: |
+      The module deliberately covers the resources where scheduled shutdown pays
+      off most: ECS services (by desired count) and RDS instances (start/stop).
+      The first iteration handled ECS services only; RDS support arrived in
+      2.0.0 together with a reworked input structure that can address multiple
+      resource types from a single schedule.
+
+      Configuration is one Terraform variable rather than a bespoke control
+      plane. That keeps the module easy to embed, but it also means schedules are
+      managed declaratively - every change is a Terraform apply - and the module
+      ships no dashboard of its own.
+
+links:
+  - label: Source
+    url: https://gitlab.com/eathtespagheti/ass
+    type: repo

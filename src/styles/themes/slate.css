@@ -1,0 +1,194 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Slate — flat dark, quiet, no glow.
+
+   The same layout overrides as `editorial`, in a dark palette. The difference
+   from `nordic` is not only colour: the animated orbs are removed, the cards
+   lose their fill and shadow, and skills render as inline prose rather than a
+   field of pills. Softer than pure black, with a single restrained accent.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --bg: #16181d;
+  --text: #d7dbe2;
+  --text-strong: #f2f4f7;
+  --muted: #8f97a3;
+  --border: #2a2e36;
+  --border-2: #3a3f49;
+
+  --accent: #7aa2c8;
+  --accent-2: #9bbcdc;
+  --accent-rgb: 122 162 200;
+  --accent-2-rgb: 155 188 220;
+
+  --brand-grad: none;
+  --card-bg: transparent;
+  --shadow: none;
+  --shadow-soft: none;
+  --header-bg: rgba(22 24 29, 0.92);
+
+  --r-lg: 0;
+  --r-pill: 2px;
+  --container: 900px;
+}
+
+/* ── No animated background ──────────────────────────────────────────────── */
+.bg,
+.bg * {
+  background: transparent !important;
+  filter: none !important;
+  opacity: 0 !important;
+}
+body {
+  background: var(--bg) !important;
+}
+
+/* ── Flat blocks ─────────────────────────────────────────────────────────── */
+.card,
+.hero,
+.card--downloads,
+.card--skills,
+.card--achievements,
+.item,
+.metric-card {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.sidebar > .card + .card,
+.main-content > .card + .card,
+.main-content > .card + .section,
+.main-content > .section + .section,
+.stack > .card {
+  margin-top: 30px !important;
+  padding-top: 26px !important;
+  border-top: 1px solid var(--border) !important;
+}
+
+/* ── Typography ──────────────────────────────────────────────────────────── */
+.hero__name {
+  font-size: clamp(29px, 4.2vw, 42px) !important;
+  font-weight: 650 !important;
+  letter-spacing: -0.022em !important;
+  color: var(--text-strong) !important;
+  line-height: 1.1 !important;
+}
+
+.h2 {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.14em !important;
+  color: var(--muted) !important;
+  margin-bottom: 14px !important;
+}
+
+.hero__title {
+  font-size: 15px !important;
+  color: var(--accent) !important;
+  font-weight: 600 !important;
+  margin-top: 6px !important;
+}
+
+.hero__summary,
+.card__desc,
+.list {
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+  color: var(--text) !important;
+}
+
+.muted,
+.item__top .muted {
+  color: var(--muted) !important;
+  font-size: 13.5px !important;
+}
+
+/* ── Skills as prose ─────────────────────────────────────────────────────── */
+.skillsgrid { gap: 18px !important; }
+.skillsgroup { border: 0 !important; padding: 0 !important; }
+
+.skillsgroup__title {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--text-strong) !important;
+  margin-bottom: 2px !important;
+}
+
+.tags { display: block !important; }
+
+.tag {
+  display: inline !important;
+  background: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  font-size: 14px !important;
+  line-height: 1.7 !important;
+  color: var(--text) !important;
+}
+
+.tag + .tag::before {
+  content: " · ";
+  color: var(--border-2);
+  padding: 0 2px;
+}
+
+/* ── Contacts and buttons ────────────────────────────────────────────────── */
+.pillrow { gap: 0 18px !important; }
+
+.pill {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  color: var(--accent) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  text-decoration-thickness: 1px !important;
+  font-size: 14px !important;
+}
+
+.btn,
+.btn--ghost {
+  background: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 2px 0 !important;
+  color: var(--accent) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+}
+
+.btnrow { gap: 16px !important; }
+
+/* ── Chrome ──────────────────────────────────────────────────────────────── */
+.header {
+  background: var(--header-bg) !important;
+  border-bottom: 1px solid var(--border) !important;
+  backdrop-filter: none !important;
+}
+
+.brand {
+  color: var(--text-strong) !important;
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.nav a {
+  text-transform: uppercase !important;
+  font-size: 11.5px !important;
+  letter-spacing: 0.1em !important;
+}
+
+.footer {
+  border-top: 1px solid var(--border) !important;
+  color: var(--muted) !important;
+}
+
+.stack { gap: 26px !important; }

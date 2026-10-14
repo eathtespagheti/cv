@@ -1,0 +1,223 @@
+# Reusable applicant facts for cover letters.
+#
+# Drawn from the same career as src/content/cv/en.yaml and the project case
+# studies, but written as self-contained *narrative* blocks rather than CV
+# bullets. A cover letter is prose, so these strings are full sentences ready to
+# drop into a paragraph — not fragments that need assembling.
+#
+# Keep this file consistent with the CV. If a claim changes on the CV, change it
+# here too: both are read by humans, and a letter that contradicts the CV is
+# worse than no letter.
+
+name: Fabio Sussarellu
+email: sussarellu.fabio@gmail.com
+linkedin: linkedin.com/in/fabio-sussarellu-739808154
+gitlab: gitlab.com/eathtespagheti
+github: github.com/eathtespagheti
+location: Alghero, Italy (Remote)
+
+# --- Employment facts (keep in sync with the CV) ------------------------------
+experience:
+  bizaway:
+    company: BizAway
+    role: Platform Engineer
+    period: Jul 2024 — present
+    context: >
+      a ~24-service platform on AWS across three applications
+  abika:
+    company: Abika
+    role: Lead DevOps Engineer
+    period: Jan 2023 — Jun 2024
+    context: >
+      a hybrid multi-cloud estate on AWS, Contabo, Cloudflare and DigitalOcean
+  ofcourseme:
+    company: Of Course Me
+    role: Software Developer / DevOps
+    period: Sep 2021 — Dec 2022
+    context: >
+      a platform cataloguing over a million online courses
+  abinsula:
+    company: Abinsula
+    role: DevOps
+    period: Jul 2017 — Aug 2021
+    context: >
+      microservices on Docker with CI/CD on GitLab CI/CD and Jenkins
+
+# --- Theme paragraphs ---------------------------------------------------------
+# Keyed by theme so a job posting can pull in only the relevant ones. Each is a
+# paragraph a human would be happy to sign. The order here is not the order a
+# letter uses — the application file decides that, leading with what the posting
+# leads with.
+
+paragraphs:
+  ci_cd: >
+    I own the delivery pipeline for a platform of about 24 microservices, running
+    at around 18 to 20 releases a day across three applications: Bitbucket
+    Pipelines with custom steps injected through dynamic
+    pipelines (Forge apps), including a shared release step that standardised
+    releases across ~24 services, removed per-service release setup and
+    enabled canary deployments. I also maintain back-merge pipelines, a custom
+    merge check and a SonarQube quality gate.
+
+  containers: >
+    I engineer the Docker image pipeline with BuildKit, including cache mounts,
+    multi-stage Dockerfiles. I publish
+    multi-architecture (ARM64) images to ECR and run a registry pull-through
+    cache that resolved a Docker Hub pull-rate-limit production incident, with
+    lifecycle policies controlling image retention.
+
+  kubernetes: >
+    I manage three AWS EKS clusters - QA, staging and production - and upgrade
+    all three on every Kubernetes minor release, one week apart starting from QA, rotating
+    node groups through surge capacity and PodDisruptionBudgets with add-on and CRD
+    validation, and no user-visible production outage to date. I maintain the
+    official EKS Cluster Upgrade Runbook for that critical, irreversible
+    control-plane procedure - covering AWS Upgrade Insights, deprecated-API
+    scanning with kubent and Pluto, and managed add-on compatibility validation. I
+    also work on the Helm charts and with the AWS load balancing (ELB/ALB).
+
+  gitops: >
+    I drove the transition to a GitOps delivery model with Flux CD, migrating
+    deploy steps and stage deployments, and I recovered the staging environment
+    after a bad kustomization evicted the deployments managed by that Flux
+    repository.
+
+  terraform: >
+    I manage infrastructure as code with Terraform, and I keep secrets as code:
+    Infisical as a Terraform secret source, SOPS encrypted with AWS KMS in the
+    GitOps repository, AWS Secrets Manager and SSM Parameter Store for runtime
+    secrets, and OIDC pipeline-to-AWS authorisation. I introduced a SOPS pre-commit
+    hook so secret hygiene is automatic, and I run OAuth2-proxy in front of
+    Keycloak OIDC to gate internal webapps. At BizAway the core infrastructure was
+    already established, so my work there is mostly extending and maintaining it,
+    with greenfield environment builds only where needed.
+
+  security: >
+    I was appointed System Administrator at BizAway, owning authentication and
+    authorisation, backup and restore, and GDPR Art. 32 cooperation, and I
+    remediated third-party penetration-test findings across the main API backend,
+    an internal app and a smaller internal service. I deploy Keycloak via Helm and
+    manage its realms, clients, groups and roles as code with the Terraform
+    provider.
+
+  runners: >
+    I designed and operated a self-hosted AWS EC2 runner fleet for Bitbucket:
+    Bitbucket shell and Docker runners managed with systemd and inotify-based
+    cleanup, usage-based storage reclamation, and runner/AMI lifecycle
+    management. I later migrated the fleet with the team from fixed EC2
+    instances to the official Bitbucket Pipelines Runners Autoscaler on
+    Kubernetes, cutting pipeline queue time from around 30 minutes at peak to
+    around 45-60 seconds at the top, bounded by Karpenter node scale-up time.
+
+  observability: >
+    I operate the logging and monitoring stack - Elasticsearch, Kibana, Grafana
+    and APM with Slack alerting - for production troubleshooting and incident
+    diagnosis, and I add targeted alerts as new failure modes appear, such as
+    search-Lambda error rate, pipeline queue wait time and Elasticsearch storage
+    usage. I also author Grafana dashboards rather than only reading them: my
+    teslamate-fuel-roi project ships two provision-ready dashboard JSONs over a
+    PostgreSQL datasource, with query and text-box template variables, stat,
+    gauge and timeseries panels, and analytical SQL behind the panels.
+
+  e2e: >
+    I build end-to-end test environments with Playwright, bringing up the
+    supporting services they need - MongoDB, Redis, Elasticsearch and Kafka. I
+    also cut E2E pipeline time from around 20 minutes to around 13 minutes by
+    persisting the Docker/BuildKit cache on the self-hosted runners.
+
+  data_stores: >
+    I operate Redis in production on AWS ElastiCache at BizAway - failover
+    behaviour, memory eviction policies and scaling strategies - and at Abika
+    I deployed and managed Redis in production.
+
+  platform_tooling: >
+    I build internal developer platforms rather than only operating them. I
+    designed and built a self-service QA environment manager that replaced
+    a ticketed, manual provisioning process with one-click create, suspend,
+    resume and delete of isolated environments, automating their lifecycle
+    through Flux CD and integrating Slack for deploy tracking.
+
+  go_tooling: >
+    I also write Go where the platform calls for it. I authored a Traefik
+    middleware plugin that rewrites request and response headers from configurable
+    rules, evaluating Go templates against the request or the response and
+    wrapping the ResponseWriter so headers set late in the response are still
+    rewritten. It is a small codebase with unit tests built on net/http/httptest
+    and linting with golangci-lint.
+
+  aws_cloud: >
+    At Abika I ran around 45 clients and moved 24 of them off the single shared
+    AWS account onto dedicated per-client accounts, while the rest stayed on
+    Contabo, DigitalOcean and the shared account, building each environment from
+    scratch - VPC
+    networking (subnets, route tables, routing, peering, Transit Gateway),
+    reusable Terraform modules and account-onboarding patterns - and deployed
+    their workloads on ECS (EC2 and Fargate) with autoscaling and rolling
+    deployments, and on AWS Lambda, all managed with Terraform. That replaced
+    manually administered, overprovisioned EC2/EBS hosts with a hybrid estate
+    across AWS, Contabo, Cloudflare and DigitalOcean, and let the company track
+    cost per client. I cut monthly cloud spend from about €12,000 to about
+    €6,000 by right-sizing ECS capacity, deleting inactive and duplicated
+    instances, snapshots, unused NAT gateways and unallocated Elastic IPs, and
+    scheduling off-hours shutdown of every client's development and staging RDS
+    and ECS with an internal, Lambda-based AWS Services Scheduler shipped as a
+    Terraform module, plus moving low-tier deployments to Contabo VPS and
+    handing Savings Plans management to an external partner.
+    I also led the migration of client workloads to AWS. The scheduler is now
+    open source.
+
+  backend: >
+    At Of Course Me I developed backend microservices for the search, cataloguing
+    and distribution of over a million online courses, and I dismantled a
+    monolithic scraping and cataloguing system into a separately deployable
+    service per source platform, owning their CI/CD and AWS infrastructure as
+    code with Terraform.
+
+  mentoring: >
+    At Abika I led a cross-skilled team of three engineers - a junior DevOps
+    engineer, a trainee and an embedded developer moving into DevOps: I designed
+    each solution and delivered its first instance, then taught the team to
+    complete the rest. I owned project
+    intake, assessed solutions by cost, reliability and performance, and broke
+    work into tasks matched to each engineer's strengths, providing the technical
+    support to keep them unblocked.
+
+  documentation: >
+    I write internal runbooks and procedures and provide developer
+    support through the internal support channel - triage, diagnosis, resolution
+    and rollback of failed releases.
+
+  peer_review: >
+    I review peers' changes and provide design feedback across the platform
+    team.
+
+  homelab: >
+    Outside work I run a self-hosted single-node Kubernetes cluster built with
+    kubeadm, using Cilium eBPF as a full kube-proxy replacement, Gateway API
+    routing, Flux GitOps, SOPS-encrypted secrets and centralised Keycloak OIDC -
+    the place I test ideas before proposing them at work.
+
+  ai_tooling: >
+    I work agentically as a matter of course: OpenCode is my daily driver, and I
+    treat agent behaviour as configuration - custom skills, least-privilege
+    subagents and per-project rules in AGENTS.md, driven by the Superpowers
+    plan-first workflow. I also self-host the supporting stack so I control
+    prompts, data and provider choice: Open WebUI, MetaMCP as an MCP gateway,
+    and OmniRoute as an OpenAI-compatible gateway with provider routing,
+    fallback and prompt compression, alongside Cursor IDE and local models
+    served by Ollama on Linux. The skills that audit this CV, draft cover
+    letters and keep the CV, project list and letter facts consistent are my
+    own.
+
+# --- Closing variants ----------------------------------------------------------
+closings:
+  default: >
+    I would welcome the opportunity to discuss how my experience could fit your
+    team's work.
+  startup: >
+    I am drawn to small teams where infrastructure decisions are made close to
+    the product, and where one person owning a problem end to end actually
+    matters.
+  leadership: >
+    I am interested in roles where I can combine hands-on platform engineering
+    with owning technical direction and supporting less experienced engineers.

@@ -1,0 +1,44 @@
+title: "Internal Application Helm Chart"
+role: "Author / Maintainer"
+year: "2024 — present"
+tagline: "One Helm chart for every in-house service — now the default way we ship to Kubernetes."
+shareable: true
+
+platforms: [Kubernetes]
+stack: [Helm, Kubernetes, Traefik, Bitbucket Pipelines, OCI registry]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      Every service used to carry its own copy of a Deployment, a Service and an Ingress, and every copy drifted from the others. This chart replaced that: one generic chart that renders the whole surface a service needs, driven entirely by `values.yaml`.
+
+      It is now the default. Around 24 in-house applications deploy through it across production and staging.
+
+  - type: divider
+
+  - type: text
+    title: "One chart, the whole surface"
+    body: |
+      A single install can render up to eleven Kubernetes kinds — `Deployment`, `Service`, `Ingress`, Traefik `IngressRoute` and `Middleware`, `TraefikService`, `HPA`, `PodDisruptionBudget`, `ServiceAccount`, `ConfigMap` and `Secret` — all optional, so a small worker and a full web application use the same chart.
+
+      It ships sensible defaults where it can and stays out of the way where it can't: security contexts, rolling-update strategy, `minReadySeconds`, graceful termination, volumes, tolerations, probes and resource requests all come from values.
+
+  - type: divider
+
+  - type: text
+    title: "Canary without a second chart"
+    body: |
+      The chart can render a second, parallel track for canaries — its own `Deployment`, `Service` and `HPA` — plus a weighted Traefik `TraefikService` to split traffic between the two. Sending 5% of traffic to a new build is a values change, not another set of manifests.
+
+      ConfigMap and Secret revisions are annotated into the pod template, so a config change rolls the workload by itself instead of waiting for someone to remember a restart.
+
+  - type: divider
+
+  - type: text
+    title: "Guarding the upgrade path"
+    body: |
+      Values are validated against a committed JSON schema before anything is rendered, so a typo in `values.yaml` fails loudly instead of producing half a deployment.
+
+      Releases are published to an OCI registry from CI, and the pipeline refuses to overwrite a version that already exists — a released chart version is immutable. A pre-commit hook regenerates the README and the values schema from the templates, so the documentation cannot drift from the chart.

@@ -1,0 +1,171 @@
+nav:
+  home:
+    en: "Home"
+    ru: "Главная"
+    zh: "首页"
+    it: "Home"
+  projects:
+    en: "Projects"
+    ru: "Проекты"
+    zh: "项目"
+    it: "Progetti"
+  changelog:
+    en: "Changelog"
+    ru: "Лог обновлений"
+    zh: "更新日志"
+    it: "Changelog"
+  role:
+    en: "Role"
+    ru: "Роль"
+    zh: "职位"
+    it: "Ruolo"
+
+cv:
+  unnamed:
+    en: "Unnamed"
+    ru: "Без имени"
+    zh: "未命名"
+    it: "Senza nome"
+  contacts:
+    en: "Contacts"
+    ru: "Контакты"
+    zh: "联系方式"
+    it: "Contatti"
+  skills:
+    en: "Skills"
+    ru: "Навыки"
+    zh: "技能"
+    it: "Competenze"
+  experience:
+    en: "Experience"
+    ru: "Опыт"
+    zh: "经验"
+    it: "Esperienza"
+  achievements:
+    en: "Achievements"
+    ru: "Достижения"
+    zh: "成就"
+    it: "Risultati chiave"
+  download:
+    en: "Download"
+    ru: "Скачать"
+    zh: "下载"
+    it: "Download"
+  downloads_people:
+    en: "For people"
+    ru: "Людям"
+    zh: "给人看"
+    it: "Per le persone"
+  downloads_ats:
+    en: "For ATS"
+    ru: "Для ATS"
+    zh: "给 ATS"
+    it: "Per ATS"
+  company_fallback:
+    en: "Company"
+    ru: "Компания"
+    zh: "公司"
+    it: "Azienda"
+  empty_skills:
+    en: "Add skills to YAML — tags will appear here."
+    ru: "Добавь skills в YAML — и тут появятся теги."
+    zh: "在 YAML 中添加技能，标签会显示在这里。"
+    it: "Aggiungi le competenze al YAML — i tag appariranno qui."
+  empty_experience:
+    en: "Add experience to YAML — your timeline will appear here."
+    ru: "Добавь experience в YAML — тут появится таймлайн опыта."
+    zh: "在 YAML 中添加经验，这里会显示你的时间线。"
+    it: "Aggiungi l'esperienza al YAML — la cronologia apparirà qui."
+  projects:
+    en: "Selected Projects"
+    ru: "Личные проекты"
+    zh: "个人项目"
+    it: "Progetti selezionati"
+  projects_private:
+    en: "Private"
+    ru: "Приватный"
+    zh: "私有"
+    it: "Privato"
+
+projects:
+  platforms:
+    en: "Platforms"
+    ru: "Платформы"
+    zh: "平台"
+    it: "Piattaforme"
+  stack:
+    en: "Stack"
+    ru: "Стек"
+    zh: "技术栈"
+    it: "Stack"
+  tags:
+    en: "Tags"
+    ru: "Теги"
+    zh: "标签"
+    it: "Tag"
+  featured:
+    en: "Featured"
+    ru: "Избранное"
+    zh: "精选"
+    it: "In evidenza"
+  title:
+    en: "Projects"
+    ru: "Проекты"
+    zh: "项目展示"
+    it: "Progetti"
+  page_title:
+    en: "Projects"
+    ru: "Проекты"
+    zh: "项目"
+    it: "Progetti"
+  empty:
+    en: "No projects yet."
+    ru: "Здесь пока ничего."
+    zh: "暂无项目。"
+    it: "Ancora nessun progetto."
+  case_study:
+    en: "Case Study"
+    ru: "Case Study"
+    zh: "Case Study"
+    it: "Caso di studio"
+
+changelog:
+  title:
+    en: "Changelog"
+    ru: "Лог активности"
+    zh: "更新日志"
+    it: "Changelog"
+  subtitle:
+    en: "Version history of CV Hub"
+    ru: "История версий CV Hub"
+    zh: "CV Hub 版本历史"
+    it: "Cronologia delle versioni di CV Hub"
+  empty:
+    en: "No entries yet."
+    ru: "Записей пока нет."
+    zh: "暂无记录。"
+    it: "Ancora nessuna voce."
+
+notfound404:
+  title:
+    en: "404"
+    ru: "404"
+    zh: "404"
+    it: "404"
+  subtitle:
+    en: ""
+    ru: ""
+    zh: ""
+    it: ""
+
+meta:
+  description:
+    en: "CV Hub - one place for your actual resume."
+    ru: "CV Hub - единое место для твоего резюме."
+    zh: "CV Hub — 一个展示你最新简历的地方。"
+    it: "CV di Fabio Sussarellu — Platform Engineer: esperienza, competenze e progetti."
+  locale:
+    en: "en_US"
+    ru: "ru_RU"
+    zh: "zh_CN"
+    it: "it_IT"

@@ -1,0 +1,224 @@
+---
+//
+//  ProjectPage.astro
+//  CV Hub — Case study page template
+//
+//  Created by Alexander Gusarov on 30.03.2026.
+//  @spartan121
+//
+import Layout from './Layout.astro';
+import TextBlock  from './blocks/TextBlock.astro';
+import ImageBlock from './blocks/ImageBlock.astro';
+import VideoBlock from './blocks/VideoBlock.astro';
+import CodeBlock  from './blocks/CodeBlock.astro';
+import Divider    from './blocks/DividerBlock.astro';
+import { getEntry } from 'astro:content';
+import { makeT } from '../scripts/t';
+
+const { data, projectsHref, langLinks, lang, ogImage } = Astro.props;
+
+// Back-link label follows the UI language, same key the nav uses.
+const translations = await getEntry('i18n', 'translations');
+const t = makeT(translations?.data ?? {}, lang);
+
+// LCP: the first image block is very likely the hero shot right under the
+// title — load it eagerly instead of the lazy default every other image
+// block uses (same reasoning as ProjectCard's eager cover).
+const blocks = data.blocks ?? [];
+const firstImageIdx = blocks.findIndex((b: any) => b.type === 'image');
+
+const projectTitle = data?.title || 'CV Hub';
+const pageTitle = projectTitle === 'CV Hub' ? 'CV Hub' : `${projectTitle} — CV Hub`;
+---
+
+<Layout
+  title={pageTitle}
+  description={data?.tagline || undefined}
+  ogImage={ogImage}
+  lang={lang}
+  section="projects"
+  profile=""
+  customLangLinks={langLinks}
+>
+<div class="project-page container">
+
+  <!-- Nav: back + share button -->
+  <nav class="project-page__nav">
+    <a class="btn btn--ghost" href={projectsHref}>← {t('nav.projects')}</a>
+    
+    {data.shareable === true && (
+      <button 
+        class="btn btn--ghost btn--icon share-btn" 
+        type="button"
+        aria-label="Copy link"
+      >
+        <svg class="share-btn__icon share-btn__icon--link" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+        </svg>
+        <svg class="share-btn__icon share-btn__icon--check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </button>
+    )}
+  </nav>
+
+  <!-- Header -->
+  <header class="project-page__header">
+    {(data.role || data.year) && (
+      <div class="project-page__meta muted">
+        {data.role && <span>{data.role}</span>}
+        {data.role && data.year && <span>·</span>}
+        {data.year && <span>{data.year}</span>}
+      </div>
+    )}
+
+    <h1 class="project-page__title">{data.title}</h1>
+
+    {data.tagline && (
+      <p class="project-page__tagline muted">{data.tagline}</p>
+    )}
+
+    {(data.platforms?.length > 0 || data.stack?.length > 0) && (
+      <div class="project-page__tags-row">
+        {data.platforms?.length > 0 && (
+          <div class="row">
+            <div class="row__title">{t('projects.platforms')}</div>
+            <ul class="tags">
+              {data.platforms.map((p: string) => <li class="tag">{p}</li>)}
+            </ul>
+          </div>
+        )}
+        {data.stack?.length > 0 && (
+          <div class="row">
+            <div class="row__title">{t('projects.stack')}</div>
+            <ul class="tags">
+              {data.stack.map((s: string) => <li class="tag">{s}</li>)}
+            </ul>
+          </div>
+        )}
+      </div>
+    )}
+
+    {data.links?.filter((l: any) => l?.url).length > 0 && (
+      <div class="links">
+        {data.links.filter((l: any) => l?.url).map((l: any) => (
+          <a class="btn" href={l.url} target="_blank" rel="noopener">{l.label}</a>
+        ))}
+      </div>
+    )}
+  </header>
+
+  <!-- Blocks -->
+  {blocks.map((block: any, i: number) => {
+    if (block.type === 'divider') return <Divider />;
+    if (block.type === 'text')    return <TextBlock  {...block} />;
+    if (block.type === 'image')   return <ImageBlock {...block} eager={i === firstImageIdx} />;
+    if (block.type === 'video')   return <VideoBlock {...block} />;
+    if (block.type === 'code')    return <CodeBlock   {...block} />;
+    return null;
+  })}
+
+</div>
+</Layout>
+
+<script>
+  document.addEventListener('click', async (e) => {
+    const btn = (e.target as HTMLElement)?.closest('.share-btn');
+    if (!btn) return;
+
+    const url = window.location.href;
+
+    try {
+      await navigator.clipboard.writeText(url);
+
+      // Показываем галочку
+      btn.classList.add('share-btn--copied');
+
+      // Возвращаем иконку ссылки через 3 секунды
+      setTimeout(() => {
+        btn.classList.remove('share-btn--copied');
+      }, 3000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  });
+</script>
+
+<style>
+  .project-page {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-bottom: 60px;
+  }
+
+  .project-page__nav {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .project-page__header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .project-page__meta {
+    display: flex;
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  .project-page__title {
+    margin: 0;
+    font-size: clamp(24px, 4vw, 38px);
+    line-height: 1.15;
+  }
+
+  .project-page__tagline {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    max-width: 60ch;
+  }
+
+  .project-page__tags-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Share button */
+  .btn--icon {
+    padding: 12px;
+    min-width: auto;
+    position: relative;
+  }
+
+  .share-btn__icon {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .share-btn__icon--check {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    stroke: var(--success, #10b981);
+  }
+
+  .share-btn--copied .share-btn__icon--link {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  .share-btn--copied .share-btn__icon--check {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+</style>

@@ -1,0 +1,50 @@
+title: "C Data Structures — First-Class ADTs in C"
+role: "Author"
+year: "2020"
+tagline: "A set of pointer-based data-structure libraries, each of which can be used on its own."
+shareable: true
+
+platforms: [Library, Linux]
+stack: [C, Make, Git submodules]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      I wrote these structures while studying and then cleaned them up enough to share. The constraint I set myself was to treat every structure as a first-class abstract data type: the container is opaque, it stores pointers, and the operations are supplied through function pointers. That keeps the libraries generic without macros or generated code.
+
+  - type: divider
+
+  - type: text
+    title: "The libraries"
+    body: |
+      Each structure lives in its own repository and is mounted here as a git submodule, so any single one can be cloned and used without the rest:
+
+      - **Array** — a dynamic array
+      - **ArrayListConversionLib** — conversions between arrays and lists
+      - **Lists** — a singly-linked `Shortlist` and a doubly-linked `List`
+      - **BSTs** — a plain `BST` and an `AdvancedBST`
+      - **SymbleTable** — a dynamic-array-backed symbol table
+      - **CUtils** — general utility functions
+      - **TypesCollection** — wrappers for the primitive types (Integer, Double, Float, Number)
+
+  - type: divider
+
+  - type: text
+    title: "Design notes"
+    body: |
+      The code leans heavily on pointers and function pointers, which is the whole exercise: the user supplies comparison, copy and free functions, and the structure never needs to know what it is holding. Comments are partly in Italian, and the repository carries a clang-format configuration.
+
+      Because of the submodules, a recursive clone is required to pull the full set.
+
+  - type: divider
+
+  - type: text
+    title: "Why it is here"
+    body: |
+      It is the least glamorous project I have published, and that is rather the point: manual memory management, opaque types, and designing an API that stays useful without knowing the payload type are fundamentals that show up in the systems work I do now.
+
+links:
+  - label: Source
+    url: https://github.com/eathtespagheti/C-Data-Structures

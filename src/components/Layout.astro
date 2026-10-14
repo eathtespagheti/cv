@@ -1,0 +1,314 @@
+---
+//
+//  Layout.astro
+//  CV Hub
+//
+//  Created by Alexander Gusarov on 03.03.2026.
+//  @spartan121
+//
+import '../styles/global.css';
+import AnimatedBackground from './AnimatedBackground.astro';
+import Lightbox from './Lightbox.astro';
+import { getEntry } from 'astro:content';
+import { makeT } from '../scripts/t';
+
+// Default theme.
+//
+// `global.css` defines the base tokens (a dark blue palette). This import comes
+// after it, so the theme's :root overrides win and this is what a visitor gets
+// with no `?theme=` parameter. Other themes remain switchable at runtime — the
+// inline script in <head> appends `/themes/<name>.css` after everything else,
+// so a query parameter still beats this.
+//
+// `frosted` defines every token that global.css does, so nothing from the base
+// dark palette leaks through. A theme that defines only *some* tokens would
+// inherit the rest from the dark base — check before swapping this line.
+import '../styles/themes/frosted.css';
+
+const {
+  title = 'Fabio Sussarellu — Platform Engineer',
+  lang = 'en',
+  section = 'main',
+  profile = '',
+  description,
+  ogImage,
+  customLangLinks,
+  personJsonLd,
+  noindex = false,
+} = Astro.props;
+
+// --- Config ---
+const langConfig    = await getEntry('languages', 'languages');
+let profileConfig = null;
+try { profileConfig = await getEntry('profiles', 'profiles'); } catch {}
+const translations  = await getEntry('i18n', 'translations');
+let siteConfig = null;
+try { siteConfig = await getEntry('site', 'site'); } catch {}
+
+const defaultLang = langConfig?.data?.default ?? 'en';
+const allLangs    = langConfig?.data?.languages ?? [];
+const allProfiles = profileConfig?.data?.profiles ?? [];
+const t = makeT(translations?.data ?? {}, lang);
+
+// --- Meta ---
+const repo = import.meta.env.GITHUB_REPOSITORY;
+const [owner] = repo ? repo.split('/') : [null, null];
+// Astro.site mirrors astro.config.mjs's `site` — SITE_URL (custom domain) or
+// the GITHUB_REPOSITORY-derived github.io URL, whichever that resolved to.
+// Single source of truth instead of recomputing it here from the env var.
+// Astro.site always carries a trailing slash — stripped here since every
+// consumer below concatenates its own leading slash (previously produced a
+// literal "//" in canonical/OG URLs on every page).
+const siteUrl = (Astro.site?.toString() ?? 'http://localhost:4321/').replace(/\/$/, '');
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const metaDescription = description ?? t('meta.description');
+// og-image.png is a public/ asset, so it's served under `base` like anything
+// else — this was missing `base` entirely before, so the og:image URL 404'd
+// on the deployed (project-page) site.
+// One OG image per language (public/media/og-image-{lang}.png, see
+// generate-og-image.mjs) — every page already knows its own `lang`, so a
+// devops/gamedev/case-study page just reuses the same-language default-
+// profile image automatically, no per-page ogImage prop needed.
+// `ogImage` accepts either an absolute URL or a site-relative path
+// ("/media/og-cover.png") — a page shouldn't have to know how siteUrl/base
+// resolve just to override its card. Product pages (the CV Hub case study,
+// the changelog) pass the static product cover this way; every CV/profile
+// page falls through to its own generated, per-language card.
+const metaImage = ogImage
+  ? (/^https?:\/\//.test(ogImage)
+      ? ogImage
+      : `${siteUrl}${base}${ogImage.startsWith('/') ? '' : '/'}${ogImage}`)
+  : `${siteUrl}${base}/media/og-image-${lang}.png`;
+const canonicalUrl = `${siteUrl}${Astro.url.pathname}`;
+
+// --- Navigation ---
+function buildHref(profileSlug: string, langId: string): string {
+  const segments = [];
+  if (profileSlug) segments.push(profileSlug);
+  if (langId !== defaultLang) segments.push(langId);
+  return `${base}/${segments.join('/')}`;
+}
+
+const homeHref     = buildHref(profile, lang);
+
+const projectsHref = lang === defaultLang
+  ? `${base}/projects`
+  : `${base}/projects/${lang}`;
+
+const langLinks = customLangLinks ?? allLangs.map(l => ({
+  id:     l.id,
+  label:  l.label,
+  href:   buildHref(profile, l.id),
+  active: l.id === lang,
+}));
+
+const profileLinks = allProfiles.map(p => ({
+  id:     p.id,
+  label:  p.label,
+  href:   buildHref(p.slug, lang),
+  active: p.slug === profile,
+}));
+
+// hreflang: reuses langLinks — the same data that drives the language
+// switcher — so it's only ever as accurate as that already is. Skipped when
+// there's nothing to alternate between, when the page is noindex'd (404), or
+// for `changelog` — that page doesn't override langLinks (no per-page RU
+// build exists), so the inherited default would point hreflang at the
+// homepage instead of a real changelog translation.
+const showHreflang = !noindex && section !== 'changelog' && langLinks.length > 1;
+
+const currentYear = new Date().getFullYear();
+// This deployment is served from our own cluster, not GitHub Pages, so
+// GITHUB_REPOSITORY is unset and the upstream fallbacks would attribute the
+// footer to the template's original author. Point the footer at the real
+// owner instead. `upstreamGit` is kept for the "Built with CV Hub" credit.
+const upstreamGit = 'https://github.com/KeeGooRoomiE/cv_hub';
+const ownerName  = 'Fabio Sussarellu';
+// Header brand. Full name — this is a personal site rather than a product.
+const brandName  = 'Fabio Sussarellu';
+const authorGit  = 'https://gitlab.com/eathtespagheti/cv';
+const authorGitHubPage = 'https://github.com/eathtespagheti';
+const showFooterCredit = siteConfig?.data?.footerCredit ?? true;
+
+// schema.org/Person — only pages that describe an actual person pass
+// personJsonLd (HomePage.astro); url/image are filled in here from data this
+// component already computed, so callers only supply person-specific fields.
+const jsonLd = personJsonLd ? {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  url: canonicalUrl,
+  image: metaImage,
+  ...Object.fromEntries(
+    Object.entries(personJsonLd).filter(([, v]) => v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0))
+  ),
+} : null;
+// JSON.stringify output is embedded verbatim in a <script> tag below — a "</"
+// in any string value (e.g. a bio mentioning markup) would otherwise close
+// the tag early. < is invisible to JSON parsers but not to an HTML tokenizer.
+const jsonLdSafe = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : null;
+---
+
+<!doctype html>
+<html lang={lang} data-base={base}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={metaDescription} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="alternate icon" href={`${base}/favicon.ico`} />
+
+    {showHreflang && (
+      <>
+        {langLinks.map((l) => (
+          <link rel="alternate" hreflang={l.id} href={`${siteUrl}${l.href}`} />
+        ))}
+        <link rel="alternate" hreflang="x-default" href={`${siteUrl}${langLinks.find((l) => l.id === defaultLang)?.href ?? langLinks[0].href}`} />
+      </>
+    )}
+
+    {jsonLdSafe && (
+      <script type="application/ld+json" set:html={jsonLdSafe} />
+    )}
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:image" content={metaImage} />
+    <meta property="og:locale" content={t('meta.locale')} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={metaDescription} />
+    <meta name="twitter:image" content={metaImage} />
+
+    <script is:inline>
+      const params = new URLSearchParams(window.location.search);
+      const theme = params.get('theme');
+      const allowed = ['frosted', 'light', 'nordic', 'peachy', 'editorial', 'slate'];
+      if (theme && allowed.includes(theme)) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = `${document.documentElement.dataset.base}/themes/${theme}.css`;
+        document.addEventListener('DOMContentLoaded', () => {
+          document.head.appendChild(link);
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <AnimatedBackground />
+    <header class="header">
+      <div class="container header__row">
+        <a class="brand" href={homeHref}>{brandName}</a>
+
+        <nav class="nav">
+          <a href={homeHref}>{t('nav.home')}</a>
+
+          {profileLinks.length > 1 && (
+            <div class="dropdown">
+              <button
+                class="dropdown__trigger"
+                type="button"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="role-menu"
+              >
+                {t('nav.role')} ▾
+              </button>
+              <ul class="dropdown__menu" id="role-menu">
+                {profileLinks.map(p => (
+                  <li>
+                    <a href={p.href} class={p.active ? 'active' : ''}>
+                      {p.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <a href={projectsHref}>{t('nav.projects')}</a>
+        </nav>
+
+        <div class="lang">
+          {langLinks.map(l => (
+            <a class={l.active ? 'active' : ''} href={l.href}>{l.label}</a>
+          ))}
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <script>
+      // Dropdown: click-toggle + click-outside to close.
+      // Pure CSS :hover закрывает меню при малейшем выходе курсора за контейнер.
+      // Sync aria-expanded with open state for screen readers.
+      const setExpanded = (dropdown: Element, open: boolean) => {
+        dropdown.querySelector('.dropdown__trigger')?.setAttribute('aria-expanded', String(open));
+      };
+
+      const closeAll = () => {
+        document.querySelectorAll('.dropdown.is-open').forEach(d => {
+          d.classList.remove('is-open');
+          setExpanded(d, false);
+        });
+      };
+
+      document.querySelectorAll<HTMLElement>('.dropdown').forEach(dropdown => {
+        const trigger = dropdown.querySelector<HTMLElement>('.dropdown__trigger');
+        if (!trigger) return;
+
+        trigger.addEventListener('click', e => {
+          e.stopPropagation();
+          const willOpen = !dropdown.classList.contains('is-open');
+          closeAll();
+          if (willOpen) {
+            dropdown.classList.add('is-open');
+            setExpanded(dropdown, true);
+          }
+        });
+      });
+
+      // Клик вне любого дропдауна — закрываем все
+      document.addEventListener('click', () => closeAll());
+
+      // Escape — закрываем все и возвращаем фокус на триггер
+      document.addEventListener('keydown', e => {
+        if (e.key !== 'Escape') return;
+        const open = document.querySelector<HTMLElement>('.dropdown.is-open .dropdown__trigger');
+        closeAll();
+        open?.focus();
+      });
+    </script>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <span><a href={authorGitHubPage} target="_blank" rel="noopener" class="footer__link">
+          {ownerName}
+        </a> © {currentYear}</span>
+        <span class="footer__links">
+          {showFooterCredit && (
+            <a href={upstreamGit} target="_blank" rel="noopener" class="footer__link">
+              Built with CV Hub
+            </a>
+          )}
+          <a href={authorGit} target="_blank" rel="noopener" class="footer__link">
+            Source
+          </a>
+        </span>
+      </div>
+    </footer>
+
+    <Lightbox />
+  </body>
+</html>

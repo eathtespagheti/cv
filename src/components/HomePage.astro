@@ -1,0 +1,289 @@
+---
+//
+//  HomePage.astro
+//  CV Hub
+//
+//  Created by Alexander Gusarov on 03.03.2026.
+//  @spartan121
+//
+import Layout from './Layout.astro';
+import { getEntry } from 'astro:content';
+import { makeT } from '../scripts/t';
+
+const {
+  lang = 'en',
+  data = {},
+  downloadUrls = {},
+  t: tProp = {},
+  profile = ""
+} = Astro.props;
+
+const t = {
+  nameFallback: tProp.nameFallback ?? 'Unnamed',
+  contacts:     tProp.contacts     ?? 'Contacts',
+  skills:       tProp.skills       ?? 'Skills',
+  experience:   tProp.experience   ?? 'Experience',
+  achievements: tProp.achievements ?? 'Achievements',
+  downloads:    tProp.downloads    ?? 'Download',
+  company:      tProp.company      ?? 'Company',
+  empty_skills:      tProp.empty_skills      ?? 'Add skills to YAML — tags will appear here.',
+  empty_experience:  tProp.empty_experience  ?? 'Add experience to YAML — your timeline will appear here.',
+  projects:         tProp.projects         ?? 'Selected Projects',
+  projectsPrivate:  tProp.projects_private ?? 'Private',
+};
+
+// Download buttons: which formats show, and in what order/grouping —
+// site.yml (defaults to the flat [pdf, docx], the pair a visitor actually
+// recognizes; see src/content/site/site.yml for the full reasoning).
+//
+// Two formats can render the *same* one-word label on purpose (pdf and
+// pdfAts both say "PDF" — the qualifier belongs on the group heading, not
+// the button, see docs/INFO_en.md §17) — so distinct aria-labels are required
+// wherever that happens, or a screen reader announces two identical items.
+let siteConfig = null;
+try { siteConfig = await getEntry('site', 'site'); } catch {}
+const rawDownloads = siteConfig?.data?.downloads ?? ['pdf', 'docx'];
+
+// Flat array of format keys → one implicit, unlabeled group. Array of
+// {group, items} → each entry is its own labeled section. Not a per-element
+// normalizer (like skills' bare-string-or-group entries) — these are two
+// mutually exclusive shapes for the whole field, since "flat" specifically
+// means "one group, no heading needed".
+const downloadGroups = rawDownloads.length === 0
+  ? []
+  : typeof rawDownloads[0] === 'string'
+    ? [{ group: null, items: rawDownloads }]
+    : rawDownloads.map((g) => ({ group: g.group ?? null, items: g.items ?? [] }));
+
+let translations = null;
+try { translations = await getEntry('i18n', 'translations'); } catch {}
+const t2 = makeT(translations?.data ?? {}, lang);
+const groupLabel = (group) => {
+  if (!group) return null;
+  const key = `cv.downloads_${group}`;
+  const resolved = t2(key);
+  return resolved === key ? group : resolved; // no translation → literal key, not the dotted path
+};
+
+const downloadMeta = {
+  pdf:    { label: 'PDF',  ariaLabel: 'Resume PDF',        solid: true },
+  pdfAts: { label: 'PDF',  ariaLabel: 'ATS-optimized PDF', solid: false, hint: 'ATS-optimized, single-column version — for pasting into a job-portal upload form' },
+  docx:   { label: 'DOCX', ariaLabel: 'Resume DOCX',       solid: false },
+  txt:    { label: 'TXT',  ariaLabel: 'Resume plain text', solid: false },
+};
+
+const downloads = downloadGroups
+  .map((g) => ({
+    label: groupLabel(g.group),
+    items: g.items
+      .map((key) => ({ key, url: downloadUrls[key], ...downloadMeta[key] }))
+      .filter((d) => d.url && d.label),
+  }))
+  .filter((g) => g.items.length > 0);
+
+const pageTitle = `${data?.name ?? t.nameFallback} — ${data?.title ?? 'Platform Engineer'}`;
+
+const contacts     = Array.isArray(data?.contacts)    ? data.contacts    : [];
+const rawSkills    = Array.isArray(data?.skills)      ? data.skills      : [];
+const experience   = Array.isArray(data?.experience)  ? data.experience  : [];
+const achievements = Array.isArray(data?.achievements)? data.achievements: [];
+const projects      = Array.isArray(data?.projects) ? data.projects : [];
+const projectsIntro = typeof data?.projects_intro === 'string' ? data.projects_intro : '';
+const photo = typeof data?.photo === 'string' ? data.photo : '';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const normalizeBullet = (v) => {
+  if (typeof v === 'string') return v;
+  if (v && typeof v === 'object') {
+    if (typeof v.text === 'string') return v.text;
+    if (typeof v.label === 'string' && typeof v.value === 'string') return `${v.label}: ${v.value}`;
+    return Object.entries(v).map(([k, val]) => `${k}: ${String(val)}`).join(' · ');
+  }
+  return String(v);
+};
+
+const skillGroups = rawSkills
+  .map((s) =>
+    typeof s === 'string'
+      ? { group: null, items: [s] }
+      : { group: s?.group ?? null, items: Array.isArray(s?.items) ? s.items : [] }
+  )
+  .filter((g) => g.items.length > 0);
+
+// schema.org/Person — url/image get filled in by Layout itself; this only
+// supplies the person-specific fields. sameAs wants profile URLs (GitHub,
+// LinkedIn, ...), not a mailto: link, so email is split out separately.
+const emailContact = contacts.find((c) => /^mailto:/i.test(c?.url ?? ''));
+const profileContacts = contacts.filter((c) => /^https?:\/\//i.test(c?.url ?? ''));
+const personJsonLd = data?.name ? {
+  name: data.name,
+  jobTitle: data?.title || undefined,
+  description: data?.summary || undefined,
+  email: emailContact ? emailContact.url.replace(/^mailto:/i, '') : undefined,
+  sameAs: profileContacts.map((c) => c.url),
+  knowsAbout: skillGroups.flatMap((g) => g.items),
+} : undefined;
+---
+
+<Layout title={pageTitle} description={data?.summary || undefined} personJsonLd={personJsonLd} lang={lang} section="main" profile={profile}>
+  <section class="container">
+    <div class="page-grid">
+
+      {/* ── SIDEBAR ── */}
+      <aside class="sidebar">
+
+        {/* 0. Profile photo */}
+        {photo && (
+          <article class="card card--photo">
+            <img class="profile-photo" src={`${base}${photo}`} alt={data?.name ?? ''} loading="lazy" />
+          </article>
+        )}
+
+        {/* 1. Download */}
+        <article class="card card--downloads">
+          <h2 class="h2">{t.downloads}</h2>
+          {downloads.map((g) => (
+            <Fragment>
+              {g.label && <div class="skillsgroup__title">{g.label}</div>}
+              <div class="btnrow" aria-label={g.label ?? t.downloads}>
+                {g.items.map((d) => (
+                  <a class={`btn ${d.solid ? '' : 'btn--ghost'}`} href={d.url} download aria-label={d.ariaLabel} title={d.hint}>{d.label}</a>
+                ))}
+              </div>
+            </Fragment>
+          ))}
+        </article>
+
+        {/* 2. Skills */}
+        <article class="card card--skills">
+          <h2 class="h2">{t.skills}</h2>
+          {skillGroups.length > 0 ? (
+            <div class="skillsgrid">
+              {skillGroups.map((g) => (
+                <div class="skillsgroup">
+                  {g.group && <div class="skillsgroup__title">{g.group}</div>}
+                  <ul class="tags">
+                    {g.items.map((s) => <li class="tag">{s}</li>)}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p class="muted">
+              {t.empty_skills}
+            </p>
+          )}
+        </article>
+
+      </aside>
+
+      {/* ── MAIN CONTENT ── */}
+      <main class="main-content">
+
+        {/* 1. Hero */}
+        <div class="card hero">
+          <div class="hero__top">
+            <div>
+              <h1 class="hero__name">{data?.name ?? t.nameFallback}</h1>
+              {data?.title   && <p class="hero__title">{data.title}</p>}
+              {data?.summary && <p class="hero__summary">{data.summary}</p>}
+            </div>
+          </div>
+
+          {contacts.length > 0 && (
+            <div class="hero__contacts">
+              <div class="section__title">{t.contacts}</div>
+              <div class="pillrow">
+                {contacts.map((c) => (
+                  <a
+                    class="pill"
+                    href={c.url}
+                    target={c.url?.startsWith('mailto:') ? undefined : '_blank'}
+                    rel={c.url?.startsWith('mailto:')    ? undefined : 'noopener'}
+                  >
+                    {c.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 2. Achievements */}
+        {achievements.length > 0 && (
+          <article class="card card--achievements">
+            <h2 class="h2">{t.achievements}</h2>
+            <ul class="list">
+              {achievements.map((a) => <li>{a}</li>)}
+            </ul>
+          </article>
+        )}
+
+        {/* 3. Experience */}
+        <section class="section section--experience">
+          <h2 class="h2">{t.experience}</h2>
+
+          {experience.length > 0 ? (
+            <div class="stack">
+              {experience.map((e) => (
+                <article class="card item">
+                  <div class="item__top">
+                    <strong>{e.company ?? t.company}</strong>
+                    <span class="muted">{e.period ?? ''}</span>
+                  </div>
+                  {e.role && <div class="muted">{e.role}</div>}
+                  {Array.isArray(e.description) && e.description.length > 0 && (
+                    <ul class="list">
+                      {e.description.map((d) => <li>{normalizeBullet(d)}</li>)}
+                    </ul>
+                  )}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <article class="card">
+              <p class="muted">
+                {t.empty_experience}
+              </p>
+            </article>
+          )}
+        </section>
+
+        {/* 4. Personal Projects */}
+        {projects.length > 0 && (
+          <section class="section section--projects">
+            <h2 class="h2">{t.projects}</h2>
+            {projectsIntro && <p class="muted">{projectsIntro}</p>}
+            <div class="stack">
+              {projects.map((p) => (
+                <article class="card item">
+                  <div class="item__top">
+                    <strong>
+                      {p.url
+                        ? <a href={p.url} target="_blank" rel="noopener">{p.name}</a>
+                        : p.name}
+                    </strong>
+                    {p.private && <span class="muted">{t.projectsPrivate}</span>}
+                  </div>
+                  {p.description && <div class="muted">{p.description}</div>}
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+      </main>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .card--photo { padding: 0; overflow: hidden; }
+  .profile-photo {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    object-position: 50% 18%;
+  }
+</style>

@@ -1,0 +1,22 @@
+# Local build + run for the CV image.
+#
+# The project is named `cv` by default, but that can be overridden from the shell
+# or a local (gitignored) `.env` by exporting COMPOSE_PROJECT_NAME. Everything
+# else follows the Dockerfile unchanged.
+name: ${COMPOSE_PROJECT_NAME:-cv}
+
+services:
+  cv:
+    build:
+      context: .
+      args:
+        # Canonical origin baked in at build time — drives the canonical URL,
+        # hreflang and the sitemap. Must match the Dockerfile default.
+        SITE_URL: ${SITE_URL:-https://cv.eathtespagheti.eu}
+    image: ${COMPOSE_PROJECT_NAME:-cv}:dev
+    ports:
+      # Host side is remappable with CV_PORT; the container always listens on 8080.
+      - "${CV_PORT:-8081}:8080"
+    restart: unless-stopped
+    # Healthcheck is inherited from the Dockerfile's HEALTHCHECK — no need to
+    # repeat it here.

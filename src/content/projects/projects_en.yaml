@@ -1,0 +1,737 @@
+projects:
+  - slug: kubernetes-homelab
+    order: 1
+    name: Advanced Kubernetes Homelab
+    role: Architect / Operator
+    year: "2019 — present"
+    description: >
+      A single-node homelab built on kubeadm, evolved from a legacy
+      Docker host. Fully declarative and GitOps-managed with Flux; all secrets
+      encrypted at rest with SOPS and age. Cilium provides eBPF-based networking
+      as a complete kube-proxy replacement, with L2 announcements, L7 ingress
+      controllers and Gateway API routing. Split-horizon DNS via k8s-gateway with
+      Quad9 DoT upstream and Cloudflare DDNS for external access. Central IAM via
+      Keycloak with OIDC, Google IdP federation and custom RBAC across self-hosted
+      services, plus a self-hosted Headscale control plane for cross-site
+      tunnels with embedded DERP relays. A single forwarded ingress is the only
+      public entry point; every other service is LAN/VPN-only. Certificates are
+      issued automatically by cert-manager, and Prometheus/Grafana provide
+      in-cluster monitoring.
+    category: Infrastructure
+    theme: blue
+    featured: true
+    platforms: [Kubernetes, Linux, Self-hosted]
+    tags: [kubernetes, cilium, ebpf, gitops, flux, sops, keycloak, oidc, cert-manager, headscale, gateway-api, prometheus, hubble, homelab]
+    metrics:
+      - label: Orchestrator
+        value: kubeadm (single node)
+      - label: Networking
+        value: Cilium eBPF
+      - label: Public surface
+        value: One forwarded ingress
+      - label: Identity
+        value: Keycloak OIDC / RBAC
+      - label: Secrets
+        value: SOPS + age
+    stack:
+      - Kubernetes (kubeadm)
+      - Cilium eBPF
+      - Flux Operator + Flux CD
+      - SOPS + age
+      - cert-manager / Let's Encrypt
+      - Keycloak
+      - Headscale / Tailscale
+      - Gateway API
+      - CloudNativePG (PostgreSQL)
+      - k8s-gateway
+      - Prometheus / Grafana
+      - Hubble
+      - Cloudflare DDNS
+      - Quad9 DoT
+    media:
+      - type: image
+        src: /media/projects/kubernetes-homelab/headlamp-map.png
+        alt: Headlamp namespace map of the cluster, grouping Deployments, StatefulSets and Jobs by namespace
+        featured: true
+      - type: image
+        src: /media/projects/kubernetes-homelab/headlamp-workloads.png
+        alt: Headlamp workload summary showing every Pod, Deployment, StatefulSet, DaemonSet and Job healthy
+
+  - slug: llm-workspace
+    order: 3
+    name: Self-Hosted LLM & Agentic Coding Workspace
+    role: Architect / Operator
+    year: "2026 — present"
+    description: >
+      A self-hosted LLM and agentic-coding platform on the Kubernetes homelab,
+      fully GitOps-managed with Flux and secured through Keycloak OIDC. Open
+      WebUI is the chat front-end; MetaMCP aggregates multiple MCP servers —
+      Playwright, Home Assistant, SearXNG, Grafana and the Tesla Fleet API among
+      them — into namespaces and endpoints; and OmniRoute is an
+      OpenAI-compatible gateway providing provider routing, automatic fallback,
+      prompt compression and a Qdrant-backed memory store. SearxNG serves
+      private web search and Open Terminal a browser terminal, with an external
+      Linux host running local models through Ollama. CloudNativePG Postgres,
+      Valkey and Qdrant back the stack, exposed through one shared ingress with
+      automatic TLS.
+    category: AI Infrastructure
+    theme: magenta
+    featured: true
+    platforms: [Kubernetes, Self-hosted, AI]
+    tags: [kubernetes, llm, ai-gateway, mcp, agentic-coding, opencode, open-webui, omniroute, metamcp, searxng, ollama, qdrant, cloudnativepg, keycloak, gitops, flux]
+    metrics:
+      - label: Gateway
+        value: OmniRoute (OpenAI-compatible)
+      - label: Tool access
+        value: MetaMCP aggregation
+      - label: Chat & models
+        value: Open WebUI + Ollama
+      - label: Data
+        value: Postgres / Valkey / Qdrant
+      - label: Delivery
+        value: Flux GitOps + OIDC
+    stack:
+      - Kubernetes (kubeadm)
+      - Flux CD (GitOps)
+      - Open WebUI
+      - OmniRoute
+      - MetaMCP
+      - SearxNG
+      - Open Terminal
+      - Ollama
+      - CloudNativePG (PostgreSQL)
+      - Valkey
+      - Qdrant
+      - Keycloak OIDC
+      - SOPS + age
+      - Cilium
+    media:
+      - type: image
+        src: /media/projects/llm-workspace/omniroute.png
+        alt: OmniRoute usage dashboard with token and request totals, provider and model counts, and cost split by provider
+        featured: true
+      - type: image
+        src: /media/projects/llm-workspace/mcp.png
+        alt: MetaMCP server list showing STDIO and streamable-HTTP MCP servers, all healthy
+
+  - slug: cv-platform
+    order: 2
+    name: CV & Cover-Letter Platform
+    role: Developer / Maintainer
+    year: "2026 — present"
+    description: >
+      The YAML-driven personal CV and portfolio platform behind this site. One
+      source of truth renders the site plus a recruiter PDF, a single-column
+      ATS-safe PDF, an editable DOCX and plain text, and generates tailored
+      cover letters from reusable narrative blocks. A five-step Node build
+      pipeline drives Astro, exports the documents through headless Chromium and
+      screenshots the built site for social previews. Packaged as a multi-stage
+      container served by nginx and shipped through GitLab CI/CD, which validates
+      content on every push and publishes tagged releases to the container
+      registry. Extends the MIT-licensed cv_hub framework with reworked content,
+      build and deployment tooling.
+    category: Developer Tooling
+    theme: emerald
+    platforms: [Web, Docker]
+    tags: [astro, typescript, nodejs, docker, gitlab-ci, nginx, playwright, static-site, cover-letter, container]
+    metrics:
+      - label: Source of truth
+        value: One YAML CV
+      - label: Outputs
+        value: Site + PDF/DOCX/TXT
+      - label: Documents
+        value: Headless Chromium export
+      - label: Delivery
+        value: GitLab CI, tagged image
+      - label: Runtime
+        value: nginx on :8080
+    stack:
+      - Astro
+      - TypeScript
+      - Node.js
+      - YAML content collections and Zod
+      - Playwright (PDF and OG image)
+      - docx and unpdf
+      - Nunjucks
+      - Docker (multi-stage)
+      - nginx
+      - GitLab CI/CD
+      - GitLab Container Registry
+    media:
+      - type: image
+        src: /media/projects/cv-platform/screenshot.png
+        alt: The CV platform homepage showing the profile header, contact links, download buttons and the start of the skills and achievements sections
+        featured: true
+    links:
+      - label: Live
+        url: https://cv.eathtespagheti.eu
+        type: demo
+      - label: Source
+        url: https://gitlab.com/eathtespagheti/cv
+        type: repo
+
+  - slug: devops-platform
+    order: 2
+    name: Self-Service QA Environment Manager
+    role: Developer
+    year: "2025 — 2026"
+    description: >
+      An internal developer-platform application giving teams - including
+      non-technical users - one-click, on-demand isolated QA environments,
+      fully automated through Flux. Includes real-time per-pipeline tracking, a
+      foreground deploy modal spanning build, release and health stages, background
+      suspend/resume/delete operations with an activity window, a navigation guard
+      against leaving mid-deploy, a one-click Slack support flow that carries the
+      failing pipeline's last log lines, and an inactive-tab notification.
+    category: Developer Platform
+    theme: magenta
+    platforms: [Internal Web App]
+    tags: [developer-platform, internal-tooling, nodejs, gitops, self-service, slack]
+    metrics:
+      - label: Users
+        value: All teams, incl. non-technical
+      - label: Provisioning
+        value: One click, fully automated
+      - label: Backend
+        value: Node.js with its own frontend
+    stack:
+      - Node.js
+      - Flux CD
+      - Slack API
+      - Docker
+      - Kubernetes
+
+  - slug: traefik-header-plugin
+    order: 4
+    name: Traefik Dynamic Header Plugin
+    role: Author
+    year: "2025"
+    description: >
+      A Traefik middleware plugin written in Go that rewrites request and response
+      headers from configurable rules, evaluating Go templates against the request
+      and response and wrapping the ResponseWriter so headers set late in the
+      response are still rewritten.
+    category: Developer Tooling
+    theme: cyan
+    platforms: [Traefik Plugin, Go]
+    tags: [go, traefik, middleware, http, proxy, devtooling]
+    metrics:
+      - label: Language
+        value: Go 1.19
+      - label: Scope
+        value: ~800 lines incl. tests
+      - label: Packaging
+        value: Traefik local plugin + Docker demo
+    stack:
+      - Go
+      - Traefik
+      - net/http
+      - text/template
+    links:
+      - label: Source
+        url: https://github.com/eathtespagheti/traefik-bizaway-headers
+        type: repo
+
+  - slug: aws-service-scheduler
+    order: 5
+    name: AWS Services Scheduler
+    role: Author
+    year: "2023"
+    description: >
+      A ready-to-ship Terraform module that deploys a Python Lambda and
+      EventBridge Scheduler schedules to power ECS services and RDS instances on
+      and off. Schedules are declared as a single Terraform variable; the Lambda
+      calls the ECS and RDS APIs through boto3 and returns a per-resource result.
+    category: Infrastructure
+    theme: emerald
+    platforms: [AWS, Terraform]
+    tags: [terraform, aws, lambda, eventbridge-scheduler, ecs, rds, python, boto3, iac, cost-optimization, open-source]
+    metrics:
+      - label: Packaging
+        value: Terraform module
+      - label: Runtime
+        value: Python 3.8 (boto3)
+      - label: Schedules
+        value: EventBridge Scheduler (cron)
+      - label: Resources
+        value: ECS services, RDS instances
+    stack:
+      - Terraform
+      - AWS Lambda
+      - Python
+      - boto3
+      - EventBridge Scheduler
+      - Amazon ECS
+      - Amazon RDS
+      - AWS IAM
+    links:
+      - label: Source
+        url: https://gitlab.com/eathtespagheti/ass
+        type: repo
+
+  - slug: abika-web
+    order: 3
+    name: Abika Corporate Site
+    role: Frontend Developer
+    year: "2017"
+    description: >
+      Responsive corporate website for Abika S.r.l. (a sister company of
+      Abinsula), built on Bootstrap 4 during a front-end internship at Abinsula.
+    category: Web
+    theme: auto
+    platforms: [Web]
+    tags: [bootstrap, responsive, frontend]
+    stack:
+      - HTML
+      - CSS
+      - Bootstrap 4
+    links:
+      - label: Source
+        url: https://gitlab.com/eathtespagheti/abika
+        type: repo
+
+  - slug: modular-makefiles
+    order: 4
+    name: Modular Makefiles
+    role: Author
+    year: "2021"
+    description: >
+      A collection of modular, reusable Makefiles for build and CI work -
+      part of an ongoing practice of turning recurring build steps into
+      composable, version-controlled pieces.
+    category: Build Tooling
+    theme: emerald
+    platforms: [CLI]
+    tags: [make, build, automation, devtooling]
+    stack:
+      - Make
+      - Shell
+    links:
+      - label: Source
+        url: https://gitlab.com/eathtespagheti/modular-makefiles
+        type: repo
+
+  - slug: club-inferno-cms
+    order: 5
+    name: Club Inferno CMS
+    role: Developer
+    year: "2017"
+    description: >
+      A CMS for a local venue, originally written in PHP with no framework, later
+      rewritten as a Django project. Built as a final diploma project at ITI
+      Angioy; both versions remain available.
+    category: Web
+    theme: blue
+    platforms: [Web]
+    tags: [php, django, cms, diploma-project]
+    stack:
+      - PHP
+      - Django
+      - Python
+      - HTML
+      - Bootstrap
+
+  - slug: vocabolariocasu-scraper
+    order: 6
+    name: vocabolariocasu-scraper
+    role: Developer
+    year: "2020"
+    description: >
+      A minimal Python scraper for an online Sardo dictionary, built with
+      Beautiful Soup and designed to run on a smartphone.
+    category: Utilities
+    theme: cyan
+    platforms: [Mobile, CLI]
+    tags: [python, beautifulsoup, scraping]
+    stack:
+      - Python
+      - Beautiful Soup
+    links:
+      - label: Source
+        url: https://gitlab.com/eathtespagheti/vocabolariocasu-scraper
+        type: repo
+
+  - slug: home-lab-services
+    order: 7
+    name: Custom Images & Home Infrastructure
+    role: Maintainer
+    year: "2020 — present"
+    description: >
+      Custom Docker images and docker-compose configurations for self-hosted
+      services at home, plus assorted Linux system work: an rEFInd
+      bootloader configuration, an EFI shim, and an AUR package for an Epson
+      inkjet driver.
+    category: Utilities
+    theme: auto
+    platforms: [Docker, Linux]
+    tags: [docker, custom-images, linux, aur, self-hosted]
+    stack:
+      - Docker
+      - Linux
+      - Shell
+      - AUR
+    links:
+      - label: GitLab Profile
+        url: https://gitlab.com/eathtespagheti
+        type: repo
+
+  - slug: bash-things
+    order: 8
+    name: bash-things
+    role: Author
+    year: "2022"
+    description: >
+      A cross-platform dotfiles and shell-automation framework for Arch Linux
+      and macOS. An OS-detecting installer and a modular loader wire up reusable
+      functions, a library of day-to-day scripts for Docker, AWS and media work,
+      and prompt integration for trueline and pure.
+    category: Developer Tooling
+    theme: cyan
+    platforms: [CLI, Linux, macOS]
+    tags: [bash, shell, dotfiles, automation, cross-platform]
+    stack:
+      - Bash
+      - Zsh
+      - Shell
+    media:
+      - type: image
+        src: /media/projects/bash-things/screenshot.png
+        alt: The bash-things prompt, a fastfetch overview and the installed aliases in a terminal
+        featured: true
+    links:
+      - label: Source
+        url: https://gitlab.com/eathtespagheti/bash-things
+        type: repo
+
+  - slug: amdgpu-fancontrol
+    order: 9
+    name: amdgpu-fancontrol
+    role: Author
+    year: "2021"
+    description: >
+      A fan-controller daemon written in C for AMD GPUs on the amdgpu driver.
+      It reads card temperatures and applies configurable speed maps across
+      multiple GPUs and fan forks, with a small parameter and logging layer, and
+      is designed to run as a background service.
+    category: Systems
+    theme: magenta
+    platforms: [Linux, CLI]
+    tags: [c, linux, amdgpu, hardware, daemon]
+    stack:
+      - C
+      - Make
+      - sysfs
+    links:
+      - label: Source
+        url: https://gitlab.com/eathtespagheti/amdgpu-fancontrol
+        type: repo
+
+  - slug: gitlab-manager
+    order: 10
+    name: gitlab-manager
+    role: Author
+    year: "2021"
+    description: >
+      A dependency-free Bash CLI for managing GitLab projects and groups from
+      the terminal: clone, list with field filtering, search, create (including
+      from a local repository) and bulk-update, with tab completion.
+    category: Developer Tooling
+    theme: emerald
+    platforms: [CLI]
+    tags: [bash, gitlab, cli, automation]
+    stack:
+      - Bash
+      - GitLab API
+    links:
+      - label: Source
+        url: https://gitlab.com/eathtespagheti/gitlab-manager
+        type: repo
+
+  - slug: c-data-structures
+    order: 11
+    name: C Data Structures
+    role: Author
+    year: "2020"
+    description: >
+      Reusable, pointer-based data-structure libraries in C - dynamic arrays,
+      linked lists, hash tables, BSTs and symbol tables - implemented as
+      first-class ADTs with function pointers and split into independently
+      consumable git submodules.
+    category: Computer Science
+    theme: blue
+    platforms: [Library, Linux]
+    tags: [c, data-structures, adt, library, submodules]
+    stack:
+      - C
+      - Make
+      - Git submodules
+    links:
+      - label: Source
+        url: https://github.com/eathtespagheti/C-Data-Structures
+        type: repo
+
+  - slug: oneplus-hevc-recording
+    order: 12
+    name: OnePlus 6/6T HEVC Recording
+    role: Author
+    year: "2020"
+    description: >
+      A Magisk module that enables HEVC/H.265 video recording on OnePlus 6 and
+      6T at H.264-equivalent bitrates, roughly halving file sizes, with a
+      companion release pipeline that rebuilds and archives versions and
+      recomputes configurable bitrates.
+    category: Android
+    theme: magenta
+    platforms: [Android]
+    tags: [android, magisk, hevc, video, mobile]
+    stack:
+      - Magisk
+      - Shell
+    links:
+      - label: Source
+        url: https://gitlab.com/eathtespagheti/oneplus-6-6t-hevc-recording
+        type: repo
+      - label: Release Scripts
+        url: https://gitlab.com/eathtespagheti/oneplus-6-6t-hevc-recording-project-scripts
+        type: repo
+
+  - slug: coffee-pod-funnel
+    order: 13
+    name: Coffee Pod Funnel
+    role: Author
+    year: "2025"
+    description: >
+      A parametric OpenSCAD model for refilling Nespresso-style pods, with
+      configurable pod and funnel geometry, an optional threaded grinder
+      attachment and a magnetic split design for fast, tool-free refills.
+    category: Maker
+    theme: emerald
+    platforms: [3D Printing]
+    tags: [openscad, 3d-printing, parametric, cad]
+    stack:
+      - OpenSCAD
+    media:
+      - type: image
+        src: /media/projects/coffee-pod-funnel/complete.webp
+        alt: Exploded render of the coffee pod funnel and its threaded grinder attachment
+        featured: true
+      - type: image
+        src: /media/projects/coffee-pod-funnel/funnel.webp
+        alt: Assembled coffee pod funnel with its threaded collar
+      - type: image
+        src: /media/projects/coffee-pod-funnel/threaded.webp
+        alt: Threaded grinder attachment for the coffee pod funnel
+    links:
+      - label: Source
+        url: https://gitlab.com/eathtespagheti/coffee-pod-funnel
+        type: repo
+
+  - slug: openscad-designs
+    order: 14
+    name: OpenSCAD Designs
+    role: Author
+    year: "2020"
+    description: >
+      A collection of 3D-printable parametric models - bottle caps, handlebar
+      extensions, LED mounts and shock mounts - written as reusable, editable
+      OpenSCAD sources.
+    category: Maker
+    theme: auto
+    platforms: [3D Printing]
+    tags: [openscad, 3d-printing, parametric, cad]
+    stack:
+      - OpenSCAD
+    links:
+      - label: Source
+        url: https://gitlab.com/eathtespagheti/openscad-designs
+        type: repo
+
+  - slug: octopus-prices
+    order: 15
+    name: octopus-prices
+    role: Author / Operator
+    year: "2026 — present"
+    description: >
+      A self-hosted tariff tracker and Telegram bot for Octopus Energy Italy,
+      packaged as a reusable Helm chart. An hourly Kubernetes CronJob scrapes
+      the public price page, diffs the electricity offers, and - only on a
+      change - posts the full price list to a Telegram channel and DMs
+      subscribers whose chosen threshold was reached. Kubernetes ConfigMaps are
+      the only datastore and Jobs the task queue: no custom image, no database,
+      no ingress.
+    category: Automation
+    theme: cyan
+    platforms: [Kubernetes, Telegram]
+    tags: [helm, kubernetes, gitlab-ci, telegram, shell, automation, cronjob, oci]
+    metrics:
+      - label: Packaging
+        value: Helm chart, published to OCI
+      - label: Cycle
+        value: Hourly scrape, diff, fan-out
+      - label: State
+        value: Kubernetes ConfigMaps only
+      - label: Delivery
+        value: Telegram channel + per-user DMs
+    stack:
+      - Helm
+      - Kubernetes
+      - GitLab CI/CD
+      - Shell (POSIX sh)
+      - jq
+      - kubectl
+      - Telegram Bot API
+    media:
+      - type: image
+        src: /media/projects/octopus-prices/channel-chat.jpg
+        alt: The public Telegram channel receiving an updated Octopus Energy price list and a button to the alert bot
+        featured: true
+      - type: image
+        src: /media/projects/octopus-prices/bot-chat.jpg
+        alt: Subscribing to a price alert by messaging the Telegram bot
+      - type: image
+        src: /media/projects/octopus-prices/channel.jpg
+        alt: Profile of the public Prezzi Octopus Telegram channel
+    links:
+      - label: Source
+        url: https://gitlab.com/eathtespagheti/octopus-prices
+        type: repo
+      - label: Telegram bot
+        url: https://t.me/PrezziOctopusBot
+        type: other
+
+  - slug: internal-helm-chart
+    order: 16
+    name: Internal Application Helm Chart
+    role: Author / Maintainer
+    year: "2024 — present"
+    description: >
+      The internal Helm chart that became the standard way to ship in-house
+      services on Kubernetes: one generic chart rendering Deployment, Service,
+      Ingress / IngressRoute, HPA, PDB, ServiceAccount, ConfigMap and Secret,
+      with an optional canary track and weighted Traefik routing. Adopted by ~24
+      services across production and staging. Values are
+      schema-validated, and releases go to an OCI registry through a pipeline
+      that refuses to republish an existing version.
+    category: Developer Platform
+    theme: blue
+    platforms: [Kubernetes]
+    tags: [helm, kubernetes, gitops, traefik, canary, oci, schema-validation, developer-platform]
+    metrics:
+      - label: Adoption
+        value: ~24 services, 2 clusters
+      - label: Surface
+        value: 11 Kubernetes kinds, one chart
+      - label: Delivery
+        value: Canary track + weighted Traefik
+      - label: Safety
+        value: Schema-validated, version-blocked release
+    stack:
+      - Helm
+      - Kubernetes
+      - Traefik
+      - Bitbucket Pipelines
+      - OCI registry
+
+  - slug: teslamate-fuel-roi
+    order: 17
+    name: teslamate-fuel-roi
+    role: Author / Operator
+    year: "2026 — present"
+    description: >
+      An Italy-only fuel-price importer and two Grafana dashboards that turn
+      TeslaMate's trip data into fuel cost avoided and EV return on investment.
+      One container downloads and fail-closed-validates the MASE weekly price
+      report, then upserts previously unseen weeks into a fuel.prices table
+      alongside existing TeslaMate data. The dashboards are provision-ready JSON
+      over the TeslaMate Postgres datasource, computing gross and net savings and
+      an estimated break-even date against a configurable purchase price. Runs
+      weekly as a Compose job or a Kubernetes CronJob, linted and tested in
+      GitLab CI and GitHub Actions.
+    category: Observability
+    theme: emerald
+    platforms: [Kubernetes, Docker, PostgreSQL]
+    tags: [grafana, postgresql, sql, kubernetes, cronjob, kustomize, docker, docker-compose, gitlab-ci, github-actions, shell, jq, observability, teslamate]
+    metrics:
+      - label: Dashboards
+        value: Provision-ready Grafana JSON
+      - label: Pipeline
+        value: Fetch, validate, idempotent upsert
+      - label: Datasource
+        value: PostgreSQL (TeslaMate)
+      - label: Delivery
+        value: Compose job / K8s CronJob
+    stack:
+      - Grafana
+      - PostgreSQL
+      - SQL
+      - Shell (POSIX sh)
+      - jq
+      - curl
+      - Docker
+      - Docker Compose
+      - Kubernetes (CronJob)
+      - Kustomize
+      - GitLab CI/CD
+      - GitHub Actions
+      - shellcheck
+      - BuildKit
+    media:
+      - type: image
+        src: /media/projects/teslamate-fuel-roi/ev-roi-and-break-even.png
+        alt: The ev-roi Grafana dashboard with net savings, a break-even progress gauge and the estimated break-even date
+        featured: true
+      - type: image
+        src: /media/projects/teslamate-fuel-roi/ev-fuel-savings.png
+        alt: The ev-fuel-savings Grafana dashboard with fuel litres and cost avoided and weekly gross and net savings
+    links:
+      - label: Source (GitLab)
+        url: https://gitlab.com/eathtespagheti/teslamate-fuel-roi
+        type: repo
+      - label: Source (GitHub)
+        url: https://github.com/eathtespagheti/teslamate-fuel-roi
+        type: repo
+
+  - slug: gitlab-mirroring
+    order: 18
+    name: GitLab ⇄ GitHub Mirror
+    role: Author / Operator
+    year: "2026 — present"
+    description: >
+      A single POSIX shell script that reconciles a personal GitLab and GitHub
+      account and keeps them mirrored on the free tier. It audits both sides for
+      repositories missing from the other, missing, disabled or duplicated push
+      mirrors, visibility mismatches, empty repositories and divergent histories;
+      creates the missing counterpart repository and configures a server-side
+      GitLab-to-GitHub push mirror; and runs a scheduled GitHub-to-GitLab safety
+      net that fast-forwards commits pushed straight to GitHub. GitLab stays
+      canonical, and every reconcile path only creates or fast-forwards a ref -
+      nothing is deleted and no force-mirror push is used.
+    category: Developer Tooling
+    theme: emerald
+    platforms: [CLI, Linux]
+    tags: [shell, posix, git, gitlab, github, api, mirroring, systemd, automation, cli]
+    metrics:
+      - label: Language
+        value: POSIX sh (~1,000 lines)
+      - label: Direction
+        value: GitLab → GitHub push mirror
+      - label: Safety net
+        value: GitHub → GitLab (systemd timer)
+      - label: Runtime deps
+        value: git, gh, glab
+      - label: Tests
+        value: Hermetic shell suite (faked CLIs)
+    stack:
+      - POSIX shell
+      - GitLab REST API
+      - GitHub REST API (gh CLI)
+      - glab CLI
+      - Git plumbing (bare cache, refspecs)
+      - systemd
+    links:
+      - label: Source (GitLab)
+        url: https://gitlab.com/eathtespagheti/gitlab-mirroring
+        type: repo
+      - label: Source (GitHub)
+        url: https://github.com/eathtespagheti/gitlab-mirroring
+        type: repo

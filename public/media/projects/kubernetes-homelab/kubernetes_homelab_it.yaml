@@ -1,0 +1,173 @@
+title: "Homelab Kubernetes avanzato"
+role: "Architetto / Operatore"
+year: "2019 — presente"
+tagline: "Un cluster Kubernetes single-node che gira a casa, con networking eBPF, GitOps e identità centralizzata."
+shareable: true
+
+platforms: [Kubernetes, Linux, Self-hosted]
+stack: [kubeadm, Cilium, eBPF, Flux Operator, SOPS, age, Keycloak, OIDC, cert-manager, Headscale, Gateway API, CloudNativePG, k8s-gateway, Prometheus, Grafana, Hubble]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      Questa è la mia infrastruttura, costruita e gestita a casa dal 2019 — il progetto che uso per restare aggiornato sul platform engineering e per provare le cose in sicurezza prima di proporle al lavoro.
+
+      È nata come un singolo host Docker ed è stata migrata a un cluster Kubernetes gestito con kubeadm. Tutto è dichiarativo: il repository è l'unica fonte di verità, Flux lo riconcilia di continuo e ogni secret è cifrato a riposo con SOPS e age prima ancora di arrivare su Git. Non c'è alcun `kubectl apply` imperativo nella gestione quotidiana — una modifica è un commit, e il cluster converge.
+
+      Il cluster è una vera implementazione di riferimento, non un giocattolo. Fa girare un cloud personale completo — foto, media, un password manager, domotica e telemetria dell'EV — tutto sotto un unico dominio, con identità centralizzata e una superficie d'attacco pubblica volutamente minima.
+
+  - type: divider
+
+  - type: image
+    src: /media/projects/kubernetes-homelab/architecture.png
+    alt: "Architettura: Cloudflare, un singolo ingress Cilium Envoy inoltrato sulla LAN di casa, ingress dedicati solo LAN/VPN e un resolver DNS interno, tutti a servizio dei workload del cluster"
+    caption: "Un solo punto d'ingresso pubblico; tutto il resto è solo LAN/VPN."
+    natural: true
+
+  - type: text
+    title: "Architettura: un unico punto d'ingresso pubblico"
+    body: |
+      Il modello di esposizione è la parte su cui sono più accurato.
+
+      - Un singolo **ingress Cilium Envoy è l'unico servizio con port-forward** da internet; gli ingress in modalità shared sono multiplexati dietro di esso tramite SNI/Host.
+      - **Gli ingress `dedicated` e i servizi `LoadBalancer` autonomi ottengono indirizzi solo LAN** e sono raggiungibili solo dalla LAN o dalla VPN Headscale — anche se i loro nomi DNS si risolvono pubblicamente.
+      - **Cilium possiede il datapath**: una sostituzione di kube-proxy basata su eBPF, annunci L2 così che gli indirizzi `LoadBalancer` funzionino senza un load balancer hardware, un controller ingress integrato e Gateway API.
+
+      Il modello mentale — i nomi pubblici non implicano raggiungibilità pubblica, e il confine è applicato sia al router sia a livello DNS — è quello che uso su infrastrutture di produzione.
+
+  - type: divider
+
+  - type: text
+    title: "Gestire il cluster"
+    body: |
+      Quotidianamente il cluster si gestisce tramite **Headlamp**, una dashboard Kubernetes che sta dietro lo stesso SSO Keycloak, così la visibilità di routine non richiede di distribuire kubeconfig.
+
+      Al momento in cui scrivo gira 90 Pod, 66 Deployment, 5 StatefulSet e 15 Job tra i namespace di piattaforma e applicativi — tutti segnalati come healthy.
+
+  - type: image
+    src: /media/projects/kubernetes-homelab/headlamp-map.png
+    alt: "Mappa dei namespace di Headlamp che raggruppa Deployment, StatefulSet e Job per namespace, tra cui flux-system, monitoring, headscale, keycloak e cert-manager"
+    caption: "La mappa dei namespace di Headlamp: controller di piattaforma e applicativi raggruppati per namespace."
+    natural: true
+
+  - type: image
+    src: /media/projects/kubernetes-homelab/headlamp-workloads.png
+    alt: "Riepilogo dei workload di Headlamp: 90 Pod, 66 Deployment, 5 StatefulSet, 3 DaemonSet, 256 ReplicaSet, 15 Job e 3 CronJob, tutti al 100% in esecuzione"
+    caption: "Riepilogo dei workload — 90 Pod e 66 Deployment, tutti healthy."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "Networking: Cilium come sostituzione completa di kube-proxy"
+    body: |
+      Cilium sostituisce interamente kube-proxy tramite eBPF, il che elimina un'intera classe di problemi di connection tracking e rende il datapath considerevolmente più veloce di iptables.
+
+      La configurazione copre tre aspetti distinti:
+
+      - **Annunci L2** — il nodo si annuncia sul segmento locale così i servizi esposti in stile `LoadBalancer` sono raggiungibili senza un load balancer esterno
+      - **Controller ingress L7** — routing, redirect e manipolazione degli header consapevoli di HTTP tramite il proxy Envoy integrato in Cilium, con eBPF che vi indirizza il traffico
+      - **Gateway API** — il sostituto moderno e orientato ai ruoli di Ingress, usato per il routing esterno
+
+      Gestire un cluster senza kube-proxy è una scelta deliberata: è la configurazione che corrisponde alla direzione in cui va l'ecosistema, e capirne i modi di fallire è esattamente il tipo di conoscenza che ripaga durante un vero incidente.
+
+  - type: divider
+
+  - type: text
+    title: "TLS: certificati emessi automaticamente"
+    body: |
+      Ogni certificato è emesso da **cert-manager** a partire da un unico `ClusterIssuer` di Let's Encrypt, risolto con la **challenge DNS-01 tramite l'API di Cloudflare**. DNS-01 consente certificati wildcard ed evita di esporre un endpoint HTTP-01, e un `ingressShim` fa sì che qualsiasi Ingress o Gateway annotato per ACME ottenga automaticamente un certificato.
+
+  - type: divider
+
+  - type: text
+    title: "Identità: Keycloak, OIDC e RBAC"
+    body: |
+      Invece di gestire credenziali servizio per servizio, l'identità è centralizzata in **Keycloak** — distribuito con il suo operator e supportato da un proprio cluster Postgres CloudNativePG. Ogni servizio interno si federa con esso tramite OIDC, nativamente o dietro un `oauth2-proxy`. La configurazione di realm e client è riconciliata come codice da `keycloak-config-cli`, quindi non ci sono realm modificati a mano.
+
+      - **Federazione OIDC** con Google come identity provider esterno, così un unico login copre l'intera infrastruttura
+      - **Group claim** in ogni token, così le app autorizzano per gruppo invece che con liste per utente: un unico gruppo `cluster-admin` guida l'accesso a Kubernetes, l'admin di Grafana e le UI protette
+      - Lo stesso API server di Kubernetes si fida di Keycloak come **OIDC provider**, così `kubectl` e le dashboard autenticano utenti reali e mappano i gruppi direttamente su RBAC
+
+      Il risultato è che onboarding e offboarding sono una singola modifica in un unico posto, invece di una checklist su una dozzina di servizi.
+
+  - type: image
+    src: /media/projects/kubernetes-homelab/auth-flow.png
+    alt: "Flusso di autenticazione OIDC: utente verso app, l'app reindirizza a Keycloak, Keycloak si federa con Google e restituisce un ID token con un claim dei gruppi, e l'app autorizza per gruppo"
+    caption: "Single sign-on su tutta l'infrastruttura, autorizzato tramite group claim."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "Networking cross-site: Headscale"
+    body: |
+      Gestisco un control plane Tailscale self-hosted con **Headscale**, più **Headplane** per l'amministrazione web, offrendo tunnel sicuri tra sedi e dispositivi che non possiedo.
+
+      - **Relay DERP** incorporati per il NAT traversal in reti dove le connessioni dirette falliscono
+      - **Split DNS** così i nomi interni si risolvono correttamente a prescindere dal punto d'ingresso
+      - **Subnet route auto-approvate** così il tailnet può raggiungere la LAN di casa
+      - ACL applicate centralmente
+
+      Questo è il pezzo che fa comportare l'homelab come una piccola rete aziendale invece che come un insieme di macchine scollegate — che è esattamente il modello mentale necessario per il lavoro multi-sito in enterprise.
+
+  - type: divider
+
+  - type: text
+    title: "GitOps: Flux, end to end"
+    body: |
+      Il cluster è riconciliato da **Flux** (gestito dal Flux Operator) a partire da un repository GitLab via SSH, suddiviso in Kustomization `system-apps` e `apps` entrambe decifrate con SOPS al momento della riconciliazione.
+
+      Anche gli aggiornamenti delle immagini sono automatizzati: i controller image-reflector e **image-automation** osservano i registry, e quando compare un nuovo tag committano il bump su Git — così gli upgrade sono un commit revisionabile invece di un deploy imperativo. Una web UI di Flux è esposta con login OIDC tramite Keycloak.
+
+  - type: image
+    src: /media/projects/kubernetes-homelab/gitops-flow.png
+    alt: "Flusso GitOps: i registry dei container alimentano il controller image-automation, che committa i bump delle immagini al repository GitLab; Flux riconcilia il repository, decifra i secret SOPS e applica lo stato del cluster"
+    caption: "Git come unica fonte di verità, inclusi i bump delle immagini."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "Dati e DNS"
+    body: |
+      I workload stateful girano su **CloudNativePG**, che gestisce PostgreSQL con replica in streaming e failover a livello di pod (un homelab single-node, quindi nessuna garanzia contro il guasto del nodo) invece che con script di backup fatti a mano. I dati persistenti seguono un modello di storage a livelli: PVC per i dati applicativi, volumi `local` per quelli che erano host path, e storage dell'host solo per interfacce e scratch.
+
+      Il DNS è split-horizon: un resolver interno **`k8s-gateway`** osserva gli oggetti Ingress, Service e Gateway e restituisce il **vero indirizzo LAN** di ogni servizio — il che sia evita il NAT hairpinning per i servizi pubblici sia è l'unico modo in cui i client LAN/VPN possono raggiungere gli ingress solo LAN. Tutto ciò che è fuori dalla zona viene inoltrato **cifrato (DoT) verso Quad9**.
+
+  - type: image
+    src: /media/projects/kubernetes-homelab/dns-split-horizon.png
+    alt: "DNS split-horizon: il resolver interno restituisce i veri indirizzi LAN per i servizi shared e dedicated e inoltra i domini esterni a Quad9 su DoT, mentre un servizio solo LAN non ha alcun record pubblico utilizzabile"
+    caption: "Pubblico vs solo LAN, applicato a livello DNS."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "Osservabilità"
+    body: |
+      L'intero stack **Prometheus + Grafana + Alertmanager** gira in-cluster, con Grafana dietro OIDC e il suo ruolo admin mappato da un gruppo Keycloak. Una status page **Gatus** scopre automaticamente gli oggetti Ingress e controlla lo stato di salute di ogni servizio senza configurazione manuale, e **Cilium Hubble** offre visibilità sui flussi L3/L4/L7 quando è il datapath a comportarsi male.
+
+  - type: divider
+
+  - type: text
+    title: "Segreti"
+    body: |
+      Nessun secret in chiaro arriva su Git. SOPS cifra i valori con chiavi age prima del commit, e Flux li decifra al momento dell'apply. L'accesso è limitato per repository, così un token compromesso in un progetto non compromette gli altri, e un hook pre-commit applica la regola in locale.
+
+      È lo stesso approccio che ho introdotto su una piattaforma di produzione, dove un hook pre-commit di SOPS rendeva l'igiene dei secret automatica invece che una convenzione di revisione.
+
+  - type: divider
+
+  - type: text
+    title: "Roadmap"
+    body: |
+      - Espansione a un **cluster multi-node ad alta disponibilità su tre sedi geografiche** (due on-premises, una nel cloud)
+      - Una **strategia automatizzata di disaster recovery e backup** per i workload stateful
+      - Spostare più workload sulla **GPU NVIDIA** già esposta tramite il device plugin, per il serving locale di LLM e la transcodifica dei media
+
+links:
+  - label: Architettura
+    url: https://gitlab.com/eathtespagheti

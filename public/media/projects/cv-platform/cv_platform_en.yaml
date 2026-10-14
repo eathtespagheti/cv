@@ -1,0 +1,73 @@
+title: "CV & Cover-Letter Platform"
+role: "Developer / Maintainer"
+year: "2026 — present"
+tagline: "One YAML file in; a portfolio site, four document formats and tailored cover letters out — validated in CI and shipped as a container."
+shareable: true
+
+platforms: [Web, Docker]
+stack: [Astro, TypeScript, Node.js, Playwright, Docker, nginx, GitLab CI/CD, Nunjucks]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      This site, the résumé it links to and the cover letters I send all come from the same place. A single `src/content/cv/en.yaml` describes the CV; the build turns it into the portfolio pages, a two-column recruiter PDF, a single-column ATS-safe PDF, an editable DOCX and a plain-text résumé.
+
+      The point is to stop maintaining the same facts in five documents. When something changes — a new role, a reworded bullet, a corrected date — it changes once, and every output is rebuilt from it.
+
+      I built this on top of the MIT-licensed `cv_hub` framework, then reworked the content model, the container build, the CI pipeline and the cover-letter generator around how I actually apply for jobs.
+
+  - type: image
+    src: /media/projects/cv-platform/screenshot.png
+    alt: The deployed CV homepage, showing the profile photo and header, contact links, PDF/DOCX and ATS PDF/TXT download buttons, and the start of the skills and achievements sections
+    caption: "The deployed site — every element of this page is generated from the same YAML source."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "The build pipeline"
+    body: |
+      `npm run build` is five steps, not one:
+
+      - **CV merge** — profiles are merged into a single validated `public/cv/` artifact
+      - **Document export** — DOCX and plain text via the `docx` library
+      - **PDF export** — recruiter and ATS-safe PDFs rendered through headless Chromium
+      - **Astro build** — the static site itself
+      - **OG image** — a real screenshot of the built site, composited into the social preview
+
+      Content is validated by the Astro content layer on every build, so a malformed CV entry fails CI rather than shipping a broken page.
+
+  - type: divider
+
+  - type: text
+    title: "Cover letters from the same facts"
+    body: |
+      The cover-letter generator reuses the same career facts as narrative blocks, keyed by theme. An application selects and orders the themes that match a posting, and the renderer produces both Markdown and reflowed plain text.
+
+      Keeping letters downstream of one facts file means a letter can never quietly contradict the CV it is attached to.
+
+  - type: divider
+
+  - type: text
+    title: "Packaging and delivery"
+    body: |
+      The whole thing is a multi-stage Docker image: the Astro and document build runs in Playwright's official image — the browser is already there, so there is no download step — and the result is served by `nginx-unprivileged`.
+
+      GitLab CI has two jobs. `validate` runs the content and formatting regression tests and a full build on every push; it is the gate that keeps a bad YAML away from `main`. `container` runs only on tags and publishes the image to the GitLab Container Registry, so a release is a tag rather than a hand-built artifact.
+
+      Deployment is GitOps: Flux image automation picks up the new tag and rolls it out, so the same tag that was validated is the tag that runs.
+
+  - type: divider
+
+  - type: text
+    title: "What I took from it"
+    body: |
+      The interesting work was making the pipeline the source of truth. A CV is a surprisingly good excuse to practise the same discipline I apply to product infrastructure: one input, reproducible outputs, content validated at build time, and a release that is a reviewed tag instead of a manual step.
+
+links:
+  - label: Live site
+    url: https://cv.eathtespagheti.eu
+  - label: Source
+    url: https://gitlab.com/eathtespagheti/cv

@@ -1,0 +1,59 @@
+title: "bash-things — Cross-Platform Dotfiles & Shell Automation"
+role: "Author"
+year: "2022"
+tagline: "A portable shell environment that configures itself on Arch Linux and macOS."
+shareable: true
+
+platforms: [CLI, Linux, macOS]
+stack: [Bash, Zsh, Shell]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      bash-things is the shell environment I actually use day to day, packaged so it can be installed on a fresh machine with a single command. It targets Arch Linux and macOS from one codebase, detects the host OS during install and pulls in the right pieces for it.
+
+      The point is not the prompt. The point is that my machines are reproducible: aliases, environment variables, functions, completions and service units live in version control instead of accumulating by hand on each machine.
+
+  - type: divider
+
+  - type: image
+    src: /media/projects/bash-things/screenshot.png
+    alt: "The bash-things prompt, a fastfetch overview and the installed aliases in a terminal"
+    caption: "The prompt theme, a fastfetch overview and the alias set, on Arch Linux."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "Structure"
+    body: |
+      A small installer (a curl or wget one-liner) places the repository and runs the OS-specific bootstrap. From there a modular loader sources the pieces:
+
+      - modules for aliases, variables, XDG paths, auto-exec hooks and Docker helpers
+      - prompt themes for trueline and pure
+      - a services directory with systemd units for recurring local jobs
+      - a scripts directory with dozens of small, task-specific tools
+
+      A dedicated update script and alias keep installed machines in sync with the repository.
+
+  - type: divider
+
+  - type: text
+    title: "What is in the toolbox"
+    body: |
+      The scripts are single-purpose and most grew out of a real recurring annoyance: AWS credential and profile switching, Docker Compose helpers and image updates, media conversion (FLAC splitting and downsampling, video rotation, Exif tooling), RAW photo copying, subvolume conversion, git remote and submodule maintenance, snapshot listing, pastebin, wake-on-LAN and VPN helpers, and GPU clock and fan utilities.
+
+      Only Bash and standard tooling are assumed, which is what lets the same tree work across Arch Linux and macOS.
+
+  - type: divider
+
+  - type: text
+    title: "Why it is here"
+    body: |
+      It is the clearest example I have of treating a workstation as infrastructure: reproducible, versioned and maintained well past the point where reinstalling would have been easier.
+
+links:
+  - label: Source
+    url: https://gitlab.com/eathtespagheti/bash-things

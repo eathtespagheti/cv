@@ -1,0 +1,28 @@
+title: "Club Inferno CMS"
+role: "Sviluppatore"
+year: "2017"
+tagline: "Un CMS per un locale scritto due volte — prima in PHP puro, poi come si deve in Django."
+shareable: true
+
+platforms: [Web]
+stack: [PHP, Django, Python, HTML, Bootstrap]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      Il progetto finale di diploma all'ITI Angioy: un content management system per un locale. L'originale era scritto in PHP senza alcun framework, e alcuni mesi dopo la prima release è stato riscritto come progetto Django.
+
+      Riscrivere il proprio progetto una volta che sai cosa non avevi capito la prima volta è un esercizio insolitamente utile — ed entrambe le versioni restano disponibili su GitLab.
+
+  - type: divider
+
+  - type: text
+    title: "Cosa mi ha insegnato la riscrittura"
+    body: |
+      La prima versione funzionava ed era finita. Riscriverla ha significato lavorare dentro le convenzioni di un framework invece che aggirarle, una competenza diversa e più trasferibile di quanto la versione originale avesse mai richiesto.
+
+links:
+  - label: Profilo GitLab
+    url: https://gitlab.com/eathtespagheti

@@ -1,0 +1,83 @@
+title: "teslamate-fuel-roi"
+role: "Autore / Operatore"
+year: "2026 — presente"
+tagline: "I prezzi ufficiali settimanali dei carburanti in Italia uniti ai dati di viaggio di TeslaMate, trasformati in due dashboard Grafana che mostrano il carburante che un'EV evita — e quando si ripaga da sola."
+shareable: true
+
+platforms: [Kubernetes, Docker, PostgreSQL, Grafana]
+stack: [Grafana, PostgreSQL, SQL, Shell (POSIX sh), jq, curl, Docker, Docker Compose, Kubernetes, Kustomize, GitLab CI/CD, GitHub Actions, shellcheck, BuildKit]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      È nato da una domanda che avevo davvero: ora che l'auto è elettrica, quanto carburante ha evitato e quando quella cifra arriva a valere il prezzo dell'auto? TeslaMate registra già ogni viaggio, ricarica e costo — quello che non può sapere è quanto sarebbero costati benzina o diesel negli stessi giorni. Così ho costruito l'altra metà e le ho messe insieme in Grafana.
+
+      Un solo container fa tutto il lavoro in un unico passaggio. Scarica il report settimanale ufficiale dei prezzi dei carburanti del MASE, lo valida fail-closed, lo converte in CSV e inserisce le settimane non ancora viste in una tabella `fuel.prices` accanto ai dati TeslaMate esistenti. Due dashboard Grafana leggono poi insieme le tabelle di TeslaMate e quella tabella: una riporta il risparmio lordo e netto di carburante, l'altra confronta il risparmio netto con il prezzo d'acquisto dell'EV e stima una data di break-even.
+
+      È volutamente solo per l'Italia. Il feed dei prezzi, lo schema della tabella e le dashboard assumono tutti il report MASE italiano, e un'astrazione per paese/provider è esplicitamente fuori scope.
+
+  - type: image
+    src: /media/projects/teslamate-fuel-roi/ev-roi-and-break-even.png
+    alt: "La dashboard Grafana ev-roi: pannelli stat per il risparmio netto e il risparmio netto medio settimanale, un gauge di avanzamento verso il break-even, i km percorsi, la data stimata di break-even, il risparmio cumulato e quanto manca al break-even, e la timeseries del risparmio settimanale di carburante, elettricità e netto"
+    caption: "La dashboard ROI — risparmio netto, avanzamento verso il break-even e data stimata di break-even."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "Cosa mostrano le dashboard"
+    body: |
+      `ev-fuel-savings` risponde alla metà più semplice della domanda: quanta strada è stata percorsa, quanti litri di carburante avrebbe bruciato quella strada e quanto sarebbero costati quei litri ai prezzi in vigore alla data di ogni viaggio. Tre pannelli stat danno i totali — distanza percorsa, litri evitati e costo del carburante evitato — e una timeseries scompone le stesse cifre settimana per settimana, accanto a un confronto dei prezzi dei carburanti, così il trend dei prezzi alla base del risparmio resta visibile.
+
+      `ev-roi` risponde alla seconda metà: il risparmio paga l'auto? Mostra il risparmio netto nell'intervallo selezionato — costo del carburante evitato meno costo di ricarica — il risparmio netto medio settimanale, un gauge di avanzamento verso il break-even rispetto al prezzo d'acquisto e la data stimata di break-even. Sotto, il risparmio cumulato con le componenti settimanali di carburante, elettricità e netto.
+
+  - type: image
+    src: /media/projects/teslamate-fuel-roi/ev-fuel-savings.png
+    alt: "La dashboard Grafana ev-fuel-savings: pannelli stat per distanza percorsa, litri di carburante evitati e costo del carburante evitato, una timeseries del risparmio lordo e netto settimanale e un confronto dei prezzi dei carburanti"
+    caption: "La dashboard del risparmio — totali, risparmio lordo e netto settimanale e trend dei prezzi dei carburanti."
+
+  - type: divider
+
+  - type: text
+    title: "Come sono costruite le dashboard"
+    body: |
+      Le dashboard sono JSON pronti per il provisioning (schema version 42 di Grafana) versionati nel repository, non costruite a mano in un'istanza in esecuzione ed esportate dopo. Provisionarle significa copiare il JSON e uno YAML di provider nella directory di provisioning di Grafana; ogni pannello interroga una datasource PostgreSQL il cui UID è `TeslaMate`.
+
+      Tutto è guidato da variabili di template, così una dashboard si adatta senza modifiche: `car_id` e `fuel_type` sono variabili query lette dal database, `consumption_km_l` e `purchase_cost` sono text box, e `purchase_cost_neg` è una variabile nascosta derivata per il gauge. La macro `$__timeFilter` lega i pannelli all'intervallo temporale della dashboard e `$__all` alla selezione "tutte le auto".
+
+      I pannelli sono normali tipi Grafana — `stat`, `gauge` e `timeseries` — collegati a SQL grezzo sullo schema TeslaMate. I numeri sono calcolati in Postgres, non nel browser: common table expression aggregano viaggi e ricariche per settimana, un `LEFT JOIN LATERAL` sceglie il prezzo del carburante in vigore alla data di ogni viaggio, e un `FULL OUTER JOIN` allinea le settimane che hanno dati carburante ma non di ricarica, o viceversa. La variabile `fuel_type` è risolta dentro la query con un'espressione `CASE`, così passare tra benzina, diesel, GPL, metano e gli altri ricalcola il costo di ogni viaggio senza toccare un pannello. Anche la formattazione fa parte dei pannelli: valuta, chilometri e una data localizzata, con soglie di colore sui pannelli stat e zone del gauge che diventano verdi man mano che il risparmio si avvicina all'obiettivo.
+
+  - type: divider
+
+  - type: text
+    title: "La pipeline di importazione"
+    body: |
+      Feed in ingresso, prezzi in uscita — e un feed difettoso non deve mai sovrascrivere dati buoni. `fetch.sh` scarica il report MASE con `curl` entro limiti di retry e timeout, poi lo valida fail-closed prima di scrivere qualsiasi cosa: la risposta deve essere un array JSON non vuoto, ogni riga deve avere le colonne attese, l'array deve superare un numero minimo di righe e l'osservazione più recente deve essere recente. Solo quando tutto questo è vero converte le otto colonne di prezzo da euro per 1000 litri a euro per litro — preservando i null — in un file temporaneo e lo sposta al posto giusto. Qualsiasi errore esce con codice diverso da zero e lascia intatti i dati precedenti.
+
+      `import.sh` rende poi il caricamento idempotente. Crea lo schema `fuel` e la tabella `fuel.prices` se non esistono, copia il CSV in una tabella di staging usa e getta e la unisce con `INSERT ... ON CONFLICT (rilevazione) DO NOTHING` con chiave la data di osservazione. Rieseguire la stessa settimana, o un report che si sovrappone a settimane già caricate, inserisce solo ciò che è nuovo. I dettagli di connessione arrivano dalle variabili standard `PG*` di libpq, così lo stesso script funziona contro un Postgres locale, una rete Compose o un servizio Kubernetes.
+
+  - type: divider
+
+  - type: text
+    title: "Delivery e CI"
+    body: |
+      L'immagine è piccola e gira come utente non-root: `postgres:18-alpine` più `curl` e `jq`, con un entrypoint che esegue prima il fetcher e poi l'importer, così un container equivale a un ciclo fetch-and-import. In locale è un servizio Compose one-shot pensato per essere eseguito settimanalmente da cron dell'host o da un timer systemd; in Kubernetes è un overlay Kustomize che distribuisce un solo `CronJob` programmato per il lunedì sera, dopo la pubblicazione del MASE, con `concurrencyPolicy: Forbid` così un overrun non esegue mai due import insieme, retry limitati e storico dei Job conservato.
+
+      Entrambe le piattaforme CI eseguono lo stesso gate: `shellcheck` sugli script, poi una suite di test che avvia un PostgreSQL usa e getta ed esercita l'importer. I test di download non richiedono rete — puntano il fetcher a fixture `file://` locali — e coprono una risposta buona, una troppo corta, una stantia e una con forma sbagliata, verificando che ogni caso di errore non scriva nulla. GitLab CI in più costruisce e pubblica l'immagine sul GitLab Container Registry con BuildKit rootless sui tag di release, e GitHub Actions rispecchia il job di lint e test.
+
+  - type: divider
+
+  - type: text
+    title: "Scope e licenza"
+    body: |
+      Il progetto è solo per l'Italia per scelta e con licenza MIT, ed è non affiliato a TeslaMate: legge un database TeslaMate e interroga le sue tabelle, ma non modifica mai TeslaMate stesso, e nessun dataset MASE è committato — il feed viene scaricato a runtime.
+
+links:
+  - label: Sorgente (GitLab)
+    url: https://gitlab.com/eathtespagheti/teslamate-fuel-roi
+    type: repo
+  - label: Sorgente (GitHub)
+    url: https://github.com/eathtespagheti/teslamate-fuel-roi
+    type: repo

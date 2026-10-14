@@ -1,0 +1,39 @@
+title: "OpenSCAD Designs"
+role: "Author"
+year: "2020"
+tagline: "A set of parametric OpenSCAD sources for 3D-printable parts — bottle caps, handlebar extensions, LED mounts and shock mounts — where the source file is the model."
+shareable: true
+
+platforms: [3D Printing]
+stack: [OpenSCAD]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      A small collection of practical parts I needed and could not find a good model for, written in OpenSCAD rather than exported from a mesh editor. That difference matters for printed parts: a parametric source can be re-measured and re-rendered when a dimension turns out to be slightly off, while an STL is frozen.
+
+      Each part is a self-contained `.scad` file with its dimensions and tolerances named at the top, so adjusting a fit is editing a constant rather than redoing geometry.
+
+  - type: divider
+
+  - type: text
+    title: "The models"
+    body: |
+      - **Bottle cap** — a snap-fit cover generated alongside a matching fit-test piece, so the tolerance can be dialled in before printing the real part.
+      - **Handlebar extension** — an extension for a standard 22.2 mm handlebar, with a deliberately tight internal diameter so it does not slip.
+      - **LED mount** — a handlebar mount for a light, with an M3 thread and nut housing modelled directly into the connector.
+      - **Shock mount** — a bushing-style mount with separate outer and inner diameters, sized from the measured hardware.
+
+  - type: divider
+
+  - type: text
+    title: "Keeping the sources usable"
+    body: |
+      The repository is set up as a small OpenSCAD workspace rather than a folder of loose files: a `.clang-format` configuration and a small format script keep the sources consistently formatted, and the VS Code tasks and settings are checked in so rendering and formatting are one command each.
+
+links:
+  - label: Source
+    url: https://gitlab.com/eathtespagheti/openscad-designs
+    type: repo

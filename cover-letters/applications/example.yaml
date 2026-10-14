@@ -1,0 +1,43 @@
+# Example application — copy this file to `applications/<company>.yaml` and edit.
+#
+# Fields:
+#   role        Job title, as advertised
+#   company     Company name
+#   source      Where you saw it (used in the opening sentence)
+#   greeting    Use "Dear <name>" if you can find the hiring manager, else
+#               "Dear Hiring Manager"
+#   opening     One or two sentences: what you are applying for and why.
+#               This is the only paragraph you must write from scratch.
+#   themes      Which paragraphs from applicant.yaml to include, in order.
+#               See applicant.yaml for the available keys.
+#   why_company Two or three sentences referencing the company specifically.
+#               Vague flattery here is worse than omitting it — say something
+#               you could only say about them.
+#   closing     One sentence. Use a `closings` variant name from applicant.yaml
+#               or write your own.
+
+role: Platform Engineer
+company: Acme Corp
+source: your careers page
+greeting: Dear Hiring Manager
+
+opening: >
+  I am writing to apply for the Platform Engineer role at Acme Corp. I have spent
+  the last several years owning CI/CD and release infrastructure for a
+  microservice estate on Kubernetes, and the scope described in your posting
+  matches that work closely.
+
+themes:
+  - ci_cd
+  - kubernetes
+  - security
+  - platform_tooling
+
+why_company: >
+  Acme's engineering blog on migrating to a multi-cluster setup describes the same
+  constraints I ran into scaling a single cluster, and I would like to work on
+  those problems with more than one region to think about.
+
+closing: >
+  I would welcome the opportunity to discuss how my experience could fit your
+  team's work.

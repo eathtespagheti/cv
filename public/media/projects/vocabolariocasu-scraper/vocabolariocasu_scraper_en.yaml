@@ -1,0 +1,21 @@
+title: "vocabolariocasu-scraper"
+role: "Developer"
+year: "2020"
+tagline: "A dictionary scraper small enough to run on a phone."
+shareable: true
+
+platforms: [Mobile, CLI]
+stack: [Python, Beautiful Soup]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      A minimal scraper for an online Sardo dictionary, built with Python and Beautiful Soup.
+
+      The interesting constraint was the target: it was designed to run on a smartphone. That ruled out heavyweight dependencies and forced a genuinely minimal implementation — which is a useful exercise, because most scrapers I have written have been solving for a machine that does not matter.
+
+links:
+  - label: Source
+    url: https://gitlab.com/eathtespagheti/vocabolariocasu-scraper

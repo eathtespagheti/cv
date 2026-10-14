@@ -1,0 +1,69 @@
+title: "Self-Service QA Platform"
+role: "Sviluppatore"
+year: "2025 — 2026"
+tagline: "Ambienti QA isolati, completamente automatizzati, con un clic per chiunque — anche per chi non usa il terminale."
+shareable: false
+
+platforms: [Web app interna]
+stack: [Node.js, Flux CD, Kubernetes, Slack API, Docker]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      I nostri ambienti QA venivano richiesti dagli sviluppatori e creati dal team infrastruttura. Quel passaggio di consegne era il collo di bottiglia: una richiesta in un canale, una risposta qualche minuto dopo, una sequenza di passaggi manuale.
+
+      Il gestore di ambienti QA elimina il passaggio di consegne. Chiunque — inclusi colleghi senza alcuna esperienza di Kubernetes — può creare, sospendere, riprendere ed eliminare un ambiente isolato in pochi clic, e l'intero lifecycle è automatizzato tramite Flux.
+
+      Ogni ambiente è isolato nel proprio namespace e servito su un sottodominio dedicato, così gli ambienti non entrano mai in conflitto; sospenderne uno porta a zero i suoi Deployment, StatefulSet e DaemonSet mantenendolo definito.
+
+      Ho progettato e costruito l'applicazione, lavorando direttamente con i team richiedenti così che l'interfaccia rispecchiasse come lavoravano davvero.
+
+  - type: divider
+
+  - type: text
+    title: "Tracciamento dei deploy"
+    body: |
+      La schermata principale segue un deployment mentre accade, invece di riportare uno stato a posteriori:
+
+      - **Tracciamento in tempo reale per pipeline** — ogni fase del deployment è visibile e si aggiorna dal vivo
+      - **Una modale di deploy in primo piano** che copre l'intera catena: le pipeline di build, poi la pipeline di release QA, poi l'health check, così la fase corrente non è ambigua
+      - **Uno stato di errore dedicato** che rende la pipeline fallita la cosa ovvia da guardare per prima, invece di qualcosa da andare a cercare
+
+      Niente altro conta se una persona non riesce a capire cosa sta succedendo o cosa si è rotto.
+
+  - type: divider
+
+  - type: text
+    title: "Operazioni in background"
+    body: |
+      Il lavoro di lunga durata deve sopravvivere alla chiusura di una scheda da parte dell'utente, quindi le operazioni girano in background con una **finestra di attività** che mostra cosa sta succedendo in quel momento:
+
+      - Sospensione, ripresa ed eliminazione come operazioni in background
+      - Una finestra di attività visibile, così l'utente può allontanarsi e tornare senza perdere il filo
+
+      Una **navigation guard** avvisa prima di lasciare la pagina durante un deploy. Sembra banale, e non lo è — senza di essa il fallimento più comune era semplicemente che le persone navigavano altrove durante un deploy e perdevano di vista il risultato.
+
+  - type: divider
+
+  - type: text
+    title: "Flusso di supporto"
+    body: |
+      Quando qualcosa fallisce, l'applicazione aiuta l'utente a chiedere aiuto invece di lasciarlo a descrivere il problema a memoria:
+
+      - Un **flusso di supporto Slack con un clic** che apre una richiesta nel canale di supporto con il contesto già allegato
+      - Il messaggio di supporto porta con sé le **ultime righe di log della pipeline fallita**, richiesta esplicitamente dal team di piattaforma
+
+      Allegare la coda del log di errore ha trasformato le richieste di supporto da un botta e risposta in un singolo messaggio con l'evidenza reale dentro.
+
+  - type: divider
+
+  - type: text
+    title: "Notifiche"
+    body: |
+      I deployment finiscono molto dopo che le persone hanno distolto lo sguardo, quindi una **notifica su scheda inattiva** fa emergere completamento e fallimento senza richiedere che la scheda sia in primo piano.
+
+      Piccoli tocchi come questo fanno la maggior parte della differenza tra uno strumento che le persone usano e uno attorno a cui le persone lavorano.
+
+links: []

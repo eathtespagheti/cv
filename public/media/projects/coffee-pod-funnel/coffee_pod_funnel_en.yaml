@@ -1,0 +1,57 @@
+title: "Coffee Pod Funnel"
+role: "Author"
+year: "2025"
+tagline: "A parametric OpenSCAD funnel for refilling Nespresso-style pods, with an optional threaded grinder collar and a magnetic split for tool-free loading."
+shareable: true
+
+platforms: [3D Printing]
+stack: [OpenSCAD, threads-scad]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      Refillable coffee pods are cheaper and less wasteful than disposables, but loading them by hand is messy. `coffee-pod-funnel` is a parametric OpenSCAD model that holds a pod and guides ground coffee into it; in its default configuration it fits the all-metal refillable Nespresso-style pods.
+
+      Every dimension that matters is a named parameter rather than a baked-in measurement, because pod geometry varies between brands and even between batches: the lid and under-lid diameters, the tip diameter and the pod height, the funnel diameter and height, and the thread and magnet geometry can all be changed and re-rendered.
+
+  - type: image
+    src: /media/projects/coffee-pod-funnel/complete.webp
+    alt: Exploded render of the coffee pod funnel, its threaded grinder insert and the magnetic split attachment with guide pins
+    caption: "The threaded grinder insert and the magnetic split attachment, exploded."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "Threaded and magnetic options"
+    body: |
+      The base model is a funnel that sits on a pod. On top of that there are two optional parts, each controlled by its own parameters:
+
+      - **A threaded collar** that screws onto the top of the funnel so it attaches directly to a grinder, grinding straight into the pod.
+      - **A split design** in which a grinder attachment couples to the funnel with eight 6 mm magnets and matching guide pins, so it clips on and off in one movement instead of being unscrewed.
+
+      Both live in the same source file and are switched on by their dimensions. The threads themselves come from the `threads-scad` library, pulled in as a git submodule so the model stays self-contained.
+
+  - type: image
+    src: /media/projects/coffee-pod-funnel/funnel.webp
+    alt: Assembled coffee pod funnel with its threaded collar
+    caption: "The funnel on its own, with the threaded collar."
+
+  - type: image
+    src: /media/projects/coffee-pod-funnel/threaded.webp
+    alt: Threaded grinder attachment for the coffee pod funnel
+    caption: "The threaded grinder attachment."
+
+  - type: divider
+
+  - type: text
+    title: "Printing it"
+    body: |
+      The model keeps a single `FIT_TOLERANCE` constant that the mating dimensions derive from, so a fit can be loosened or tightened for a particular printer in one place. The README documents three ready configurations — funnel only, funnel with threads, and the threaded insert plus magnetic split — with a render of each.
+
+links:
+  - label: Source
+    url: https://gitlab.com/eathtespagheti/coffee-pod-funnel
+    type: repo

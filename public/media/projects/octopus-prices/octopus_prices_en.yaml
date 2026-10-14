@@ -1,0 +1,77 @@
+title: "octopus-prices"
+role: "Author / Operator"
+year: "2026 — present"
+tagline: "A Helm-packaged Kubernetes price tracker and Telegram bot that watches Octopus Energy Italy's tariffs and alerts subscribers when a price moves."
+shareable: true
+
+platforms: [Kubernetes, Telegram]
+stack: [Helm, Kubernetes, GitLab CI/CD, Shell (POSIX sh), jq, kubectl, Telegram Bot API]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      I watch the electricity offers that matter to me, so I built something that watches them for me. `octopus-prices` is a small service that scrapes the public Octopus Energy Italy tariff page every hour and, whenever an electricity price changes, does two things: it posts the full price list to a public Telegram channel, and it DMs subscribers who asked to be told when the *Octopus Fissa 12M* tariff falls below a threshold they chose.
+
+      The whole thing is delivered as a Helm chart and runs as ordinary Kubernetes objects - a `CronJob`, short-lived `Job`s and one long-running `Deployment`. There is no custom container image, no database and no ingress.
+
+  - type: divider
+
+  - type: image
+    src: /media/projects/octopus-prices/channel-chat.jpg
+    alt: "The public Telegram channel receiving an updated Octopus Energy price list and a button to the alert bot"
+    caption: "On every change the channel gets the new price list and a button to the alert bot."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "How it works"
+    body: |
+      A `CronJob` runs the scraper hourly. The script fetches the tariff page, pulls the `__NEXT_DATA__` JSON payload out of the HTML with `awk` and `sed`, and reduces it with `jq` to just the electricity offers and their consumption price. It compares that against the last snapshot stored in a ConfigMap; if nothing changed, it exits cleanly.
+
+      When something did change, the scraper writes the new snapshot back to the ConfigMap and spawns two Kubernetes `Job`s from `envsubst`-rendered pod templates - one posts the price list to the channel, the other walks the thresholds in the `alerts-config` ConfigMap and DMs the users whose price was hit. Alerts are one-shot: once a threshold fires it is removed, so nobody is messaged every hour while a price stays low.
+
+  - type: divider
+
+  - type: text
+    title: "Kubernetes objects as the only state"
+    body: |
+      There is no database and no external service. The price snapshot, the channel's last promo-message id and the `threshold -> chat ids` subscription map all live in ConfigMaps, created and patched by the scripts through the Kubernetes API.
+
+      The bot itself is an always-on `Deployment` that long-polls Telegram's `getUpdates` endpoint and handles `/track`, `/untrack`, `/stop`, `/start` and `/help`, plus inline-keyboard callbacks. It is deliberately written without `set -e` so a transient network error does not crash the pod, and it advances the update offset before processing each message so a single bad update cannot wedge the loop.
+
+      The chart ships a dedicated `ServiceAccount` bound to a namespaced `Role` that grants only `create/get/list/delete` on `batch/jobs` and `create/get/list/update/patch` on ConfigMaps - no cluster-wide permissions. Containers run as a non-root user with all capabilities dropped and privilege escalation disallowed.
+
+  - type: divider
+
+  - type: text
+    title: "Packaging and CI"
+    body: |
+      The chart is typed: `values.schema.json` validates the configuration at install time. The scripts and the runtime Job templates are shipped as Helm-generated ConfigMaps via `.Files.Get`, so changing a script is a chart change rather than an image rebuild.
+
+      GitLab CI lints the chart (`helm lint` plus `helm template` assertions on the rendered manifests) and the shell scripts with ShellCheck on every branch, and on a version tag packages the chart and pushes it to a Helm OCI registry - so it installs with a single `helm install oci://...`.
+
+  - type: divider
+
+  - type: text
+    title: "The bot and the channel"
+    body: |
+      The screenshots are the real thing: subscribing to a price alert with `/track`, and the profile of the public channel the price list is posted to.
+
+  - type: image
+    src: /media/projects/octopus-prices/bot-chat.jpg
+    alt: "Subscribing to a price alert by messaging the Telegram bot"
+    natural: true
+
+  - type: image
+    src: /media/projects/octopus-prices/channel.jpg
+    alt: "Profile of the public Prezzi Octopus Telegram channel"
+    natural: true
+
+links:
+  - label: Source
+    url: https://gitlab.com/eathtespagheti/octopus-prices
+  - label: Telegram bot
+    url: https://t.me/PrezziOctopusBot

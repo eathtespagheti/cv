@@ -1,0 +1,44 @@
+title: "amdgpu-fancontrol — Controllo ventola GPU AMD in C"
+role: "Autore"
+year: "2021"
+tagline: "Un piccolo daemon userspace che pilota le curve della ventola delle GPU AMD attraverso l'interfaccia sysfs hwmon."
+shareable: true
+
+platforms: [Linux]
+stack: [C, Make, sysfs]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      Sul driver amdgpu open source la ventola della GPU è gestita dal kernel, e la curva predefinita è conservativa: silenziosa finché la scheda non è già calda, poi rumorosa. Volevo che la macchina salisse di giri in modo fluido e mantenesse la temperatura dove avevo scelto, così ho scritto un piccolo daemon che possiede la ventola e la pilota direttamente.
+
+      È volutamente low-tech: nessun framework, nessuna dipendenza a runtime, solo C che parla con l'interfaccia sysfs del kernel.
+
+  - type: divider
+
+  - type: text
+    title: "Come funziona"
+    body: |
+      Il daemon legge la temperatura corrente dal dispositivo hwmon della scheda e riscrive un valore di velocità nel corrispondente controllo PWM, in un ciclo. Le parti sono suddivise in piccoli moduli:
+
+      - un card manager che enumera le schede e le loro istanze hwmon
+      - un fan-fork manager per configurazioni in cui più ventole o schede vengono controllate insieme
+      - una mappa temperatura-velocità con breakpoint configurabili
+      - moduli per i parametri e la loro gestione, più un piccolo livello di logging
+
+      Tutto è indirizzato tramite i percorsi standard `/sys/class/drm/card*/.../hwmon/...`, quindi non è coinvolto alcun tooling del produttore.
+
+  - type: divider
+
+  - type: text
+    title: "Build e struttura"
+    body: |
+      Un semplice Makefile compila ogni modulo e collega il binario principale — per impostazione predefinita con `tcc`, così l'intero progetto si compila quasi istantaneamente. Il codice è GPLv3.
+
+      È il progetto più piccolo qui, ma rappresentativo: accesso diretto all'hardware, gestione esplicita di memoria e puntatori, e un design diviso lungo le responsabilità anziché in un unico grande file.
+
+links:
+  - label: Sorgente
+    url: https://gitlab.com/eathtespagheti/amdgpu-fancontrol

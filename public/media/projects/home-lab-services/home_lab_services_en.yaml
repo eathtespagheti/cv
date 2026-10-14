@@ -1,0 +1,43 @@
+title: "Custom Images & Home Infrastructure Projects"
+role: "Maintainer"
+year: "2020 — present"
+tagline: "A long tail of things I built because I needed them to work."
+shareable: true
+
+platforms: [Docker, Linux]
+stack: [Docker, Linux, Shell, AUR]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      Most of what I build, I build because something needed doing. These are the smaller pieces of that — public on GitLab under `eathtespagheti`:
+
+  - type: divider
+
+  - type: text
+    title: "Custom container images"
+    body: |
+      Purpose-built Docker images for self-hosted services, including **Jellyfin** and **Nextcloud**. Not wrappers around an upstream image — images built for the deployment they actually run in.
+
+  - type: divider
+
+  - type: text
+    title: "System work"
+    body: |
+      - **rEFInd** bootloader configuration and an **EFI shim**, for a machine with a Linux bootloader that needed rescuing
+      - **AUR package** for an Epson inkjet driver, packaged because the vendor did not
+
+  - type: divider
+
+  - type: text
+    title: "Small utilities"
+    body: |
+      A notebook screen-shutdown utility.
+
+      Small things, but they are the artifacts of working on Linux as an operating system rather than only as a deployment target.
+
+links:
+  - label: GitLab Profile
+    url: https://gitlab.com/eathtespagheti

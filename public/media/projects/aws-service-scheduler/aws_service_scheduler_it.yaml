@@ -1,0 +1,62 @@
+title: "AWS Services Scheduler"
+role: "Autore"
+year: "2023"
+tagline: "Un modulo Terraform pronto all'uso che accende e spegne servizi ECS e istanze RDS su pianificazione."
+shareable: true
+
+platforms: [AWS, Terraform]
+stack: [Terraform, AWS Lambda, Python, boto3, EventBridge Scheduler, Amazon ECS, Amazon RDS, AWS IAM]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      AWS Services Scheduler (ASS) è un modulo Terraform che distribuisce una
+      piccola Lambda in Python e una serie di pianificazioni EventBridge Scheduler
+      per accendere e spegnere risorse AWS negli orari scelti. È nato come
+      progetto personale — per imparare EventBridge Scheduler, e come piccola
+      battuta sull'acronimo — è stato reso open source, ed è stato poi adottato
+      al lavoro per fermare servizi ECS e istanze RDS non di produzione che
+      restavano attivi 24 ore su 24. È pensato per essere integrato in
+      un'infrastruttura esistente invece che eseguito come servizio a sé.
+
+  - type: divider
+
+  - type: text
+    title: "Come funziona"
+    body: |
+      Il modulo riceve un'unica variabile `schedules`: una mappa con chiave
+      l'espressione cron, in cui ogni voce elenca risorse e lo stato desiderato.
+      Ogni pianificazione diventa uno schedule EventBridge che invoca la Lambda,
+      la quale ispeziona l'ARN di ciascuna risorsa e chiama l'API corrispondente
+      tramite boto3 - `UpdateService` con un `desired_count` per i servizi ECS e
+      `StartDBInstance` / `StopDBInstance` per le istanze RDS. Il modulo crea il
+      ruolo e le policy IAM per lo scheduler e per la Lambda, e ricava i nomi
+      degli schedule dalla chiave cron.
+
+      L'handler restituisce una mappa di risultati per risorsa - ad esempio i
+      conteggi desired, pending e running per ECS - e registra ogni azione, così
+      i cambi di stato pianificati sono tracciabili.
+
+  - type: divider
+
+  - type: text
+    title: "Ambito e compromessi"
+    body: |
+      Il modulo copre deliberatamente le risorse su cui lo spegnimento
+      pianificato conviene di più: servizi ECS (tramite desired count) e istanze
+      RDS (start/stop). La prima iterazione gestiva solo i servizi ECS; il
+      supporto RDS è arrivato con la 2.0.0, insieme a una struttura di input
+      rivista capace di indirizzare più tipi di risorsa dalla stessa
+      pianificazione.
+
+      La configurazione è un'unica variabile Terraform anziché un control plane
+      dedicato. Questo rende il modulo facile da integrare, ma significa anche che
+      le pianificazioni sono gestite in modo dichiarativo - ogni modifica è un
+      apply Terraform - e il modulo non offre una dashboard propria.
+
+links:
+  - label: Sorgente
+    url: https://gitlab.com/eathtespagheti/ass
+    type: repo

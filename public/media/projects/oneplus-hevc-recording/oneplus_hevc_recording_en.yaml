@@ -1,0 +1,45 @@
+title: "OnePlus 6/6T HEVC Recording"
+role: "Author"
+year: "2020"
+tagline: "A Magisk module that enables HEVC recording on OnePlus 6 and 6T at H.264-equivalent bitrates — roughly halving file sizes — plus the pipeline that rebuilds and archives each release."
+shareable: true
+
+platforms: [Android]
+stack: [Magisk, Shell, Python, XML]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      The OnePlus 6 and 6T can record HEVC (H.265), but the stock camera profiles only used it in a few places and at HEVC's own bitrates. HEVC is substantially more efficient than H.264, so recording it at H.264-equivalent bitrates gives the same-looking video in far less space.
+
+      This module enables HEVC on every profile that previously used H.264 and keeps the H.264 bitrate values. By the standard HEVC efficiency figures that works out to about a 59% average bitrate reduction — roughly 52% at 480p up to 64% at 2160p. Audio stays AAC, and from v0.3 its bitrate is doubled from 96 to 192 kb/s so the smaller file does not come with worse sound.
+
+  - type: divider
+
+  - type: text
+    title: "What the module changes"
+    body: |
+      It is a Magisk module: installing it through Magisk Manager replaces the device's `media_profiles_vendor.xml` with a modified copy, and removing the module reverts the change cleanly. The modified profile enables the HEVC encoder for every configuration that used H.264 and raises its encoder limits to match the H.264 ones, so the camera uses HEVC at the same resolutions, frame rates and bitrates as before.
+
+      The module is versioned through `module.prop` and carries a changelog, so each release says exactly which profiles and codecs it touches.
+
+  - type: divider
+
+  - type: text
+    title: "The release pipeline"
+    body: |
+      Editing the profile by hand for every release is error-prone, so a companion repository, `oneplus-6-6t-hevc-recording-project-scripts`, builds it:
+
+      - A `media_profiles_editor.py` script parses and rewrites the media-profiles XML, and a second script applies the bitrate substitutions.
+      - A shell `makeRelease.bash` task packages the result and archives it, producing both a full-bitrate and a half-bitrate zip.
+      - The stock XMLs are kept under `original/`, so each release is a change against a known-good baseline rather than a mystery diff, and the module and its half-bitrate variant are pulled in as git submodules.
+
+links:
+  - label: Source
+    url: https://gitlab.com/eathtespagheti/oneplus-6-6t-hevc-recording
+    type: repo
+  - label: Release scripts
+    url: https://gitlab.com/eathtespagheti/oneplus-6-6t-hevc-recording-project-scripts
+    type: repo

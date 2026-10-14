@@ -1,0 +1,21 @@
+title: "Abika Corporate Website"
+role: "Frontend Developer"
+year: "2017"
+tagline: "A responsive corporate site built during my internship at Abinsula."
+shareable: true
+
+platforms: [Web]
+stack: [HTML, CSS, Bootstrap 4]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      The corporate website for Abika S.r.l., a sister company of Abinsula. A responsive Bootstrap 4 site, built during my internship at Abinsula.
+
+      A small project, but an early one: my first end-to-end front-end delivery.
+
+links:
+  - label: Source
+    url: https://gitlab.com/eathtespagheti/abika

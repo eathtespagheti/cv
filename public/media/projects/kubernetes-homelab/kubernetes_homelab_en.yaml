@@ -1,0 +1,173 @@
+title: "Advanced Kubernetes Homelab & Cross-Site Infrastructure"
+role: "Architect / Operator"
+year: "2019 — present"
+tagline: "A single-node Kubernetes cluster running at home, with eBPF networking, GitOps and centralised identity."
+shareable: true
+
+platforms: [Kubernetes, Linux, Self-hosted]
+stack: [kubeadm, Cilium, eBPF, Flux Operator, SOPS, age, Keycloak, OIDC, cert-manager, Headscale, Gateway API, CloudNativePG, k8s-gateway, Prometheus, Grafana, Hubble]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      This is my own infrastructure, built and run at home since 2019 — the project I use to keep current on platform engineering and to try things safely before proposing them at work.
+
+      It began as a single Docker host and was migrated to a kubeadm-managed Kubernetes cluster. Everything is declarative: the repository is the single source of truth, Flux continuously reconciles it, and every secret is encrypted at rest with SOPS and age before it ever reaches Git. There is no imperative `kubectl apply` in day-to-day operation — a change is a commit, and the cluster converges.
+
+      The cluster is a genuine reference implementation rather than a toy. It runs a full personal cloud — photos, media, a password manager, home automation and EV telemetry — all under a single domain, with centralised identity and a deliberately minimal public attack surface.
+
+  - type: divider
+
+  - type: image
+    src: /media/projects/kubernetes-homelab/architecture.png
+    alt: "Architecture: Cloudflare, a single forwarded Cilium Envoy ingress on the home LAN, LAN/VPN-only dedicated ingresses and an internal DNS resolver, all feeding the cluster workloads"
+    caption: "One public entry point; everything else is LAN/VPN-only."
+    natural: true
+
+  - type: text
+    title: "Architecture: one public entry point"
+    body: |
+      The exposure model is the part I am most deliberate about.
+
+      - A single **Cilium Envoy ingress is the only service port-forwarded** from the internet; shared-mode ingresses are multiplexed behind it by SNI/Host.
+      - **`dedicated` ingresses and standalone `LoadBalancer` services get LAN-only addresses** and are reachable only from the LAN or the Headscale VPN — even though their DNS names resolve publicly.
+      - **Cilium owns the datapath**: an eBPF kube-proxy replacement, L2 announcements so `LoadBalancer` addresses work without a hardware load balancer, an integrated ingress controller, and Gateway API.
+
+      The mental model — public names do not imply public reachability, and the boundary is enforced at both the router and the DNS layer — is the one I use on production estates.
+
+  - type: divider
+
+  - type: text
+    title: "Operating the cluster"
+    body: |
+      Day-to-day the cluster is managed through **Headlamp**, a Kubernetes dashboard sitting behind the same Keycloak SSO, so routine visibility does not require handing out kubeconfigs.
+
+      At the time of writing it runs 90 Pods, 66 Deployments, 5 StatefulSets and 15 Jobs across the platform and application namespaces — all reporting healthy.
+
+  - type: image
+    src: /media/projects/kubernetes-homelab/headlamp-map.png
+    alt: "Headlamp namespace map grouping Deployments, StatefulSets and Jobs by namespace, including flux-system, monitoring, headscale, keycloak and cert-manager"
+    caption: "Headlamp's namespace map: platform and application controllers grouped by namespace."
+    natural: true
+
+  - type: image
+    src: /media/projects/kubernetes-homelab/headlamp-workloads.png
+    alt: "Headlamp workload summary: 90 Pods, 66 Deployments, 5 StatefulSets, 3 DaemonSets, 256 ReplicaSets, 15 Jobs and 3 CronJobs, all at 100% running"
+    caption: "Workload summary — 90 Pods and 66 Deployments, all healthy."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "Networking: Cilium as a full kube-proxy replacement"
+    body: |
+      Cilium replaces kube-proxy entirely via eBPF, which removes a whole class of connection-tracking problems and makes the datapath considerably faster than iptables.
+
+      The configuration covers three distinct concerns:
+
+      - **L2 announcements** — the node advertises itself on the local segment so services with `LoadBalancer`-style exposure are reachable without an external load balancer
+      - **L7 ingress controllers** — HTTP-aware routing, redirects and header manipulation via Cilium's embedded Envoy proxy, with eBPF steering traffic to it
+      - **Gateway API** — the modern, role-oriented replacement for Ingress, used for external routing
+
+      Operating a kube-proxy-free cluster is a deliberate choice: it is the configuration that matches where the ecosystem is heading, and understanding its failure modes is exactly the kind of knowledge that pays off during a real incident.
+
+  - type: divider
+
+  - type: text
+    title: "TLS: certificates issued automatically"
+    body: |
+      Every certificate is issued by **cert-manager** from a single Let's Encrypt `ClusterIssuer`, solved with the **DNS-01 challenge through the Cloudflare API**. DNS-01 allows wildcard certificates and avoids exposing an HTTP-01 endpoint, and an `ingressShim` means any Ingress or Gateway annotated for ACME gets a certificate automatically.
+
+  - type: divider
+
+  - type: text
+    title: "Identity: Keycloak, OIDC and RBAC"
+    body: |
+      Rather than managing credentials service-by-service, identity is centralised in **Keycloak** — deployed with its operator and backed by its own CloudNativePG Postgres cluster. Every internal service federates against it over OIDC, either natively or behind an `oauth2-proxy`. Realm and client configuration is reconciled as code by `keycloak-config-cli`, so there are no hand-edited realms.
+
+      - **OIDC federation** with Google as an external identity provider, so a single login covers the whole estate
+      - **Group claims** in every token, so apps authorise by group rather than per-user lists: one `cluster-admin` group drives Kubernetes access, Grafana admin and the gated UIs
+      - The Kubernetes API server itself trusts Keycloak as an **OIDC provider**, so `kubectl` and dashboards authenticate real users and map groups straight onto RBAC
+
+      The result is that onboarding and offboarding are a single change in one place, instead of a checklist across a dozen services.
+
+  - type: image
+    src: /media/projects/kubernetes-homelab/auth-flow.png
+    alt: "OIDC authentication flow: user to app, app redirects to Keycloak, Keycloak federates to Google and returns an ID token with a groups claim, and the app authorises by group"
+    caption: "Single sign-on across the estate, authorised by group claims."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "Cross-site networking: Headscale"
+    body: |
+      I run a self-hosted Tailscale control plane with **Headscale**, plus **Headplane** for web administration, providing secure tunnels between sites and devices I do not own.
+
+      - Embedded **DERP relays** for NAT traversal in networks where direct connections fail
+      - **Split DNS** so internal names resolve correctly regardless of entry point
+      - **Auto-approved subnet routes** so the tailnet can reach the home LAN
+      - ACLs enforced centrally
+
+      This is the piece that makes the homelab behave like a small corporate network rather than a collection of disconnected boxes — which is precisely the mental model needed for enterprise multi-site work.
+
+  - type: divider
+
+  - type: text
+    title: "GitOps: Flux, end to end"
+    body: |
+      The cluster is reconciled by **Flux** (managed by the Flux Operator) from a GitLab repository over SSH, split into `system-apps` and `apps` Kustomizations that are both SOPS-decrypted at reconcile time.
+
+      Image updates are automated too: the image-reflector and **image-automation** controllers watch the registries, and when a new tag appears they commit the bump back to Git — so upgrades are a reviewable commit rather than an imperative deploy. A Flux web UI is exposed with OIDC login through Keycloak.
+
+  - type: image
+    src: /media/projects/kubernetes-homelab/gitops-flow.png
+    alt: "GitOps flow: container registries feed the image-automation controller, which commits image bumps to the GitLab repository; Flux reconciles the repository, decrypts SOPS secrets and applies cluster state"
+    caption: "Git as the single source of truth, including image bumps."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "Data and DNS"
+    body: |
+      Stateful workloads run on **CloudNativePG**, which manages PostgreSQL with streaming replication and pod-level failover (a single-node homelab, so not a node-failure guarantee) rather than hand-rolled backup scripts. Persistent data follows a tiered storage model: PVCs for application data, `local` volumes for what used to be host paths, and host storage only for interfaces and scratch.
+
+      DNS is split-horizon: an internal **`k8s-gateway`** resolver watches Ingress, Service and Gateway objects and returns each service's **real LAN address** — which both avoids NAT hairpinning for public services and is the only way LAN/VPN clients can reach the LAN-only ingresses. Everything outside the zone is forwarded **encrypted (DoT) to Quad9**.
+
+  - type: image
+    src: /media/projects/kubernetes-homelab/dns-split-horizon.png
+    alt: "Split-horizon DNS: the internal resolver returns real LAN addresses for shared and dedicated services and forwards external domains to Quad9 over DoT, while a LAN-only service has no usable public record"
+    caption: "Public vs LAN-only, enforced at the DNS layer."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "Observability"
+    body: |
+      The full **Prometheus + Grafana + Alertmanager** stack runs in-cluster, with Grafana behind OIDC and its admin role mapped from a Keycloak group. A **Gatus** status page auto-discovers Ingress objects and checks every service's health without manual configuration, and **Cilium Hubble** gives L3/L4/L7 flow visibility when the datapath is what is misbehaving.
+
+  - type: divider
+
+  - type: text
+    title: "Secrets"
+    body: |
+      No plaintext secret reaches Git. SOPS encrypts values with age keys before commit, and Flux decrypts them at apply time. Access is scoped per-repository, so a leaked token in one project does not compromise the rest, and a pre-commit hook enforces the rule locally.
+
+      This is the same approach I introduced on a production platform, where a SOPS pre-commit hook made secret hygiene automatic instead of a review convention.
+
+  - type: divider
+
+  - type: text
+    title: "Roadmap"
+    body: |
+      - Expanding to a **highly available multi-node cluster across three geographic sites** (two on-premises, one cloud)
+      - An automated **disaster-recovery and backup strategy** for stateful workloads
+      - Moving more workloads onto the **NVIDIA GPU** already exposed through the device plugin, for local LLM serving and media transcoding
+
+links:
+  - label: Architecture
+    url: https://gitlab.com/eathtespagheti

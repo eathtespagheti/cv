@@ -1,0 +1,44 @@
+title: "Chart Helm applicativo interno"
+role: "Autore / Maintainer"
+year: "2024 — presente"
+tagline: "Un unico chart Helm per ogni servizio sviluppato in casa — oggi il modo predefinito con cui distribuiamo su Kubernetes."
+shareable: true
+
+platforms: [Kubernetes]
+stack: [Helm, Kubernetes, Traefik, Bitbucket Pipelines, Registry OCI]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      Ogni servizio portava con sé la propria copia di un Deployment, un Service e un Ingress, e ogni copia divergeva dalle altre. Questo chart ha sostituito tutto questo: un unico chart generico che rende l'intera superficie di cui un servizio ha bisogno, guidato interamente da `values.yaml`.
+
+      Oggi è il default: circa 24 applicazioni interne lo usano per il deploy su produzione e staging.
+
+  - type: divider
+
+  - type: text
+    title: "Un chart, tutta la superficie"
+    body: |
+      Un singolo install può rendere fino a undici tipi Kubernetes — `Deployment`, `Service`, `Ingress`, `IngressRoute` e `Middleware` di Traefik, `TraefikService`, `HPA`, `PodDisruptionBudget`, `ServiceAccount`, `ConfigMap` e `Secret` — tutti opzionali, così un piccolo worker e una web app completa usano lo stesso chart.
+
+      Fornisce default sensati dove può e resta fuori dai piedi dove non può: security context, strategia di rolling update, `minReadySeconds`, terminazione controllata, volumi, tolerations, probe e resource request arrivano tutti dai values.
+
+  - type: divider
+
+  - type: text
+    title: "Canary senza un secondo chart"
+    body: |
+      Il chart può rendere un secondo track parallelo per i canary — con `Deployment`, `Service` e `HPA` propri — più un `TraefikService` pesato per dividere il traffico tra i due. Mandare il 5% del traffico su una nuova build è un cambio di values, non un altro set di manifest.
+
+      Le revisioni di ConfigMap e Secret sono annotate nel pod template, così un cambio di configurazione fa rollare il workload da solo invece di aspettare che qualcuno si ricordi di riavviarlo.
+
+  - type: divider
+
+  - type: text
+    title: "Proteggere il percorso di upgrade"
+    body: |
+      I values vengono validati contro uno schema JSON committato prima che qualsiasi cosa venga renderizzata, così un refuso in `values.yaml` fallisce in modo evidente invece di produrre un deploy a metà.
+
+      Le release vengono pubblicate su un registry OCI dalla CI, e la pipeline rifiuta di sovrascrivere una versione già esistente — una versione rilasciata del chart è immutabile. Un hook di pre-commit rigenera README e schema dei values dai template, così la documentazione non può divergere dal chart.

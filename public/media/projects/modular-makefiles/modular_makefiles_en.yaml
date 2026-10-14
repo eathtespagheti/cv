@@ -1,0 +1,30 @@
+title: "Modular Makefiles & Build Tooling"
+role: "Author"
+year: "2021"
+tagline: "Turning recurring build steps into composable, version-controlled pieces."
+shareable: true
+
+platforms: [CLI]
+stack: [Make, POSIX Shell, Bash]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      A collection of modular, reusable Makefiles. The premise is simple: a build step that gets copy-pasted into five repositories is five places to fix a bug, and it is always the one you forget.
+
+      Splitting each concern into its own includable module means a fix lands once and every consumer inherits it.
+
+  - type: divider
+
+  - type: text
+    title: "Why it matters in practice"
+    body: |
+      This is small work with a disproportionate payoff, and it is the same instinct behind the larger CI/CD work I have done — shared pipeline steps, reusable release steps, common base images.
+
+      The recurring lesson is that **build logic belongs in version control as a reviewable artifact**, not in a wiki page or in the memory of whoever set it up last.
+
+links:
+  - label: Source
+    url: https://gitlab.com/eathtespagheti/modular-makefiles

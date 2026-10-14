@@ -1,0 +1,31 @@
+{#-
+  Cover letter template.
+
+  Inputs are merged from applicant.yaml (reusable facts) and an application file
+  (per-job fields). Run `npm run letter -- <application>` to render.
+
+  Placeholders you SHOULD edit per application:
+    role, company, source, greeting, opening, why_company, closing, themes
+
+  Placeholders the script fills from applicant.yaml:
+    name, email, linkedin, location, and every paragraph in `paragraphs`
+-#}
+{{ greeting }},
+
+{{ opening }}
+
+{% for theme in themes %}{{ paragraphs[theme] }}
+
+{% endfor %}Why {{ company }}
+
+{{ why_company }}
+
+{{ closing }}
+
+Thank you for your time and consideration.
+
+Kind regards,
+
+{{ name }}
+{{ email }}
+{{ linkedin }}{% if location %} · {{ location }}{% endif %}

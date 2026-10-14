@@ -1,0 +1,53 @@
+title: "Plugin Traefik per Header Dinamici"
+role: "Autore"
+year: "2025"
+tagline: "Un middleware Traefik nativo che riscrive gli header di richiesta e risposta da template Go."
+shareable: true
+
+platforms: [Traefik Plugin, Go]
+stack: [Go, Traefik, net/http, text/template]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      Un plugin middleware per Traefik che riscrive gli header di richiesta e
+      risposta a partire da regole configurabili. Ogni regola associa il nome di
+      un header a un valore scritto come template Go, valutato sul contenuto della
+      richiesta in arrivo (`[[.Host]]`, `[[.Method]]`) oppure sulla risposta, così
+      un header può derivare da ciò che ha inviato il client o da ciò che ha
+      impostato il servizio a monte.
+
+      È una base di codice piccola e mirata: un pacchetto di configurazione, un
+      pacchetto interno di regole e un `http.Handler` sottile che si innesta nel
+      meccanismo dei plugin locali di Traefik. I template usano i delimitatori
+      `[[ ]]` per non entrare in conflitto con la sintassi YAML e Go circostante,
+      e un setup `docker/` esegue il plugin contro un Traefik locale e un upstream
+      finto per le prove manuali.
+
+  - type: divider
+
+  - type: text
+    title: "Il problema dell'ordine delle risposte"
+    body: |
+      Gli header di richiesta si possono scrivere prima che venga eseguito
+      l'handler successivo, ma quelli di risposta vengono spesso impostati solo
+      quando l'handler li svuota. Il plugin avvolge l'`http.ResponseWriter` e
+      applica le regole di risposta dentro `WriteHeader`, così gli header vengono
+      riscritti nel momento in cui Traefik sta per inviarli, non prima che i
+      valori esistano.
+
+  - type: divider
+
+  - type: text
+    title: "Test"
+    body: |
+      Il plugin è coperto da test unitari basati su `net/http/httptest`: un
+      upstream finto imposta gli header e i test verificano la riscrittura di
+      richiesta e risposta end to end. Il pacchetto interno di regole ha i propri
+      test, e il progetto è verificato con `golangci-lint`.
+
+links:
+  - label: Sorgente
+    url: https://github.com/eathtespagheti/traefik-bizaway-headers

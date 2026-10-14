@@ -1,0 +1,21 @@
+title: "vocabolariocasu-scraper"
+role: "Sviluppatore"
+year: "2020"
+tagline: "Uno scraper di dizionari abbastanza piccolo da girare su un telefono."
+shareable: true
+
+platforms: [Mobile, CLI]
+stack: [Python, Beautiful Soup]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      Uno scraper minimale per un dizionario Sardo online, realizzato con Python e Beautiful Soup.
+
+      Il vincolo interessante era il target: era pensato per girare su uno smartphone. Questo escludeva dipendenze pesanti e imponeva un'implementazione davvero minimale — il che è un esercizio utile, perché la maggior parte degli scraper che ho scritto risolveva problemi per una macchina che non conta.
+
+links:
+  - label: Sorgente
+    url: https://gitlab.com/eathtespagheti/vocabolariocasu-scraper

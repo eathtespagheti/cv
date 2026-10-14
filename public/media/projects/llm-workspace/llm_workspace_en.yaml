@@ -1,0 +1,66 @@
+title: "Self-Hosted LLM & Agentic Coding Workspace"
+role: "Architect / Operator"
+year: "2026 — present"
+tagline: "A GitOps-run LLM platform and agentic-coding toolchain at home — chat, an OpenAI-compatible gateway, an MCP aggregator and local models behind one OIDC-secured ingress."
+shareable: true
+
+platforms: [Kubernetes, Self-hosted, AI]
+stack: [Kubernetes, Flux CD, Open WebUI, OmniRoute, MetaMCP, SearxNG, Open Terminal, Ollama, CloudNativePG, Valkey, Qdrant, Keycloak, SOPS, Cilium, OpenCode]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      This is the LLM and agentic-coding layer I run on top of my Kubernetes homelab. I built it to get the leverage of hosted AI tooling without giving up control of my prompts, data or provider choice — and because operating the stack myself is the fastest way to understand how these systems actually behave.
+
+      Everything lives in the same GitOps repository as the rest of the cluster: a change is a commit, Flux reconciles it, and every secret is SOPS-encrypted with age before it reaches Git. Identity is centralised in Keycloak, TLS is issued by cert-manager, and all six services are published through a single shared ingress. Nothing here is a toy — it is the workspace I develop on every day.
+
+  - type: divider
+
+  - type: text
+    title: "The LLM stack"
+    body: |
+      The stack is deliberately composable, with each service doing one job:
+
+      - **Open WebUI** — the chat front-end, federated to Keycloak for OIDC login and pointed at OmniRoute as its OpenAI-compatible backend.
+      - **OmniRoute** — an OpenAI-compatible AI gateway. It routes requests across providers with automatic fallback, applies prompt compression to cut token usage, keeps a Qdrant-backed memory store and exposes MCP tools.
+      - **MetaMCP** — an MCP aggregator and gateway. It runs several MCP servers as child processes and proxies remote ones over streamable HTTP, then groups them into namespaces and endpoints so a client sees only the tools a task needs.
+      - **SearxNG** — self-hosted metasearch, wired into the agents as a search tool.
+      - **Open Terminal** — a browser terminal companion for long-running work.
+      - **Ollama** — an external Linux host on the LAN running local models, registered with Open WebUI as an additional backend.
+
+      CloudNativePG provides the PostgreSQL that MetaMCP and the other stateful services share; Valkey caches gateway state and Qdrant holds vectors for memory and retrieval. The database, cache and vector store are the only persistent pieces, and each is a first-class cluster workload rather than a hand-managed host.
+
+  - type: image
+    src: /media/projects/llm-workspace/omniroute.png
+    alt: "OmniRoute usage dashboard: token and request totals, provider and model counts, and cost split by provider"
+    caption: "OmniRoute's usage view — request volume, token savings and cost across providers."
+    natural: true
+
+  - type: image
+    src: /media/projects/llm-workspace/mcp.png
+    alt: "MetaMCP server list showing STDIO and streamable-HTTP MCP servers, all healthy"
+    caption: "MetaMCP's server list — local STDIO servers and remote HTTP endpoints, namespaced per workload."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "Agentic coding workflow"
+    body: |
+      The stack exists to support how I actually build software. My daily driver is **OpenCode**, and the pattern that has made the biggest difference is treating agent behaviour as configuration rather than prompting it ad hoc:
+
+      - **Project rules** live in `AGENTS.md` files next to the code they govern, so conventions, build commands and constraints are loaded automatically.
+      - **Custom skills** package procedures the agent should follow exactly — for this CV site, that means skills for writing the CV, drafting cover letters, screening applications and handling untrusted job postings.
+      - **Subagents** are scoped, least-privilege workers (for example a read-only docs keeper), so specialised tasks cannot wander outside their remit.
+      - **Plan-driven workflows** come from the Superpowers plugin: brainstorm before building, debug systematically, write tests first and verify before claiming completion.
+
+      The same approach runs across my other repositories, with skills and agents tailored to each project's deployment model and constraints. OmniRoute's request-level control is what makes it practical: routing, fallback and compression are configured once and apply to every client and tool.
+
+  - type: divider
+
+  - type: text
+    title: "What it demonstrates"
+    body: |
+      Building and running this stack is how I keep current on the platform side of AI: self-hosting stateful workloads on Kubernetes, wiring OIDC and automated TLS, managing AI gateways and MCP infrastructure, and — most importantly — turning agentic coding from a novelty into a repeatable engineering workflow with reviewable rules and skills.

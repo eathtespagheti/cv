@@ -1,0 +1,38 @@
+# Build context hygiene: keep the image build fast and free of host artefacts.
+node_modules
+dist
+.astro
+
+# Generated in-build; must not leak in from the host or shadow fresh output.
+public/cv
+public/downloads
+public/media/og-image-*.png
+
+.git
+.gitignore
+.env
+.env.*
+*.log
+.DS_Store
+
+# Not part of the site build. Note: .github/ must NOT be ignored —
+# .github/scripts/generate-resume.js is a required build dependency.
+cover-letters
+
+# Also unread by `npm run build`. Excluding these keeps the context small and,
+# more importantly, stops docs/agent/session edits from invalidating `COPY . .`
+# and re-running Astro + the OG render.
+#
+# `docs/` is safe: the og-preview fallback to docs/examples/example_cv.yaml only
+# fires when public/cv/{lang}.yaml is missing, which never happens because
+# cv:build runs first.
+images
+plans
+.opencode
+.superpowers
+docs
+README.md
+AGENTS.md
+DECISIONS.md
+.gitlab-ci.yml
+compose.yaml

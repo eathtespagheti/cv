@@ -1,0 +1,44 @@
+---
+//
+//  404.astro
+//  CV Hub
+//
+//  Created by Alexander Gusarov on 12.03.2026.
+//  @spartan121
+//
+//  Astro's static 404 page: one file, one output (dist/404.html), served for
+//  every unmatched path regardless of language — there is no way to know the
+//  visitor's intended language at this point, so `lang` stays the site
+//  default. <Layout> already renders the full <html>/<head>/<body> document
+//  (meta, canonical, nav, footer) — this page must not wrap it in a second
+//  one.
+//
+
+import Layout from '../components/Layout.astro';
+import { getEntry } from 'astro:content';
+import { makeT } from '../scripts/t';
+
+const {
+  lang = 'en',
+  profile = '',
+} = Astro.props;
+
+const translations = await getEntry('i18n', 'translations');
+const t = makeT(translations?.data ?? {}, lang);
+
+const title = `${t('notfound404.title')} — CV Hub`;
+const subtitle = t('notfound404.subtitle');
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<Layout title={title} lang={lang} section="main" profile={profile} noindex>
+  <section class="container">
+    <div class="h0">404</div>
+    {subtitle && <p class="muted">{subtitle}</p>}
+  </section>
+</Layout>
+
+<script define:vars={{ base }}>
+  setTimeout(() => window.location.replace(`${base}/`), 5000);
+</script>

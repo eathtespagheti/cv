@@ -1,0 +1,38 @@
+{
+  "name": "cv-hub",
+  "type": "module",
+  "version": "1.14.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "init": "node src/scripts/init.mjs",
+    "test": "node --test src/scripts/*.test.ts",
+    "dev": "astro dev",
+    "preview": "astro preview",
+    "astro": "astro",
+    "cv:build": "node src/scripts/merge.mjs",
+    "resume:generate": "node .github/scripts/generate-resume.js",
+    "resume:pdf": "node src/scripts/resume-export-pdf.mjs",
+    "resume:import": "node src/scripts/resume-import-json.mjs",
+    "resume:linkedin": "node src/scripts/resume-import-linkedin.mjs",
+    "resume:import:all": "node src/scripts/resume-import-json.mjs docs/cv_en.json en && node src/scripts/resume-import-json.mjs docs/cv_ru.json ru",
+    "og:generate": "node src/scripts/generate-og-image.mjs",
+    "build": "npm run cv:build && npm run resume:generate && npm run resume:pdf && astro build && npm run og:generate",
+    "letter": "node cover-letters/render.mjs",
+    "letter:all": "node cover-letters/render.mjs --all"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "astro": "^7.3.2",
+    "docx": "^9.7.1",
+    "unpdf": "^1.8.1",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "nunjucks": "^3.2.4",
+    "playwright": "^1.63.0"
+  }
+}

@@ -1,0 +1,73 @@
+title: "Piattaforma CV e cover letter"
+role: "Sviluppatore / Maintainer"
+year: "2026 — presente"
+tagline: "Un file YAML in ingresso; in uscita un sito portfolio, quattro formati di documento e cover letter su misura — validati in CI e distribuiti come container."
+shareable: true
+
+platforms: [Web, Docker]
+stack: [Astro, TypeScript, Node.js, Playwright, Docker, nginx, GitLab CI/CD, Nunjucks]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      Questo sito, il CV a cui rimanda e le cover letter che invio vengono tutti dallo stesso posto. Un unico `src/content/cv/en.yaml` descrive il CV; la build lo trasforma nelle pagine del portfolio, in un PDF per recruiter a due colonne, in un PDF ATS-safe a una colonna, in un DOCX modificabile e in un CV in testo semplice.
+
+      Lo scopo è smettere di mantenere gli stessi fatti in cinque documenti. Quando qualcosa cambia — un nuovo ruolo, un bullet riformulato, una data corretta — cambia una volta sola, e ogni output viene ricostruito da lì.
+
+      L'ho costruito sopra il framework `cv_hub` con licenza MIT, poi ho rivisto il modello dei contenuti, la build del container, la pipeline CI e il generatore di cover letter in base a come mi candido davvero per un lavoro.
+
+  - type: image
+    src: /media/projects/cv-platform/screenshot.png
+    alt: La homepage del CV pubblicata, con la foto profilo e l'intestazione, i link di contatto, i pulsanti di download PDF/DOCX e ATS PDF/TXT, e l'inizio delle sezioni competenze e risultati
+    caption: "Il sito pubblicato — ogni elemento di questa pagina è generato dalla stessa fonte YAML."
+    natural: true
+
+  - type: divider
+
+  - type: text
+    title: "La pipeline di build"
+    body: |
+      `npm run build` è composto da cinque passaggi, non uno:
+
+      - **CV merge** — i profili vengono uniti in un unico artefatto validato `public/cv/`
+      - **Document export** — DOCX e testo semplice tramite la libreria `docx`
+      - **PDF export** — PDF per recruiter e ATS-safe renderizzati con Chromium headless
+      - **Astro build** — il sito statico stesso
+      - **OG image** — uno screenshot reale del sito compilato, composto nell'anteprima social
+
+      I contenuti vengono validati dal content layer di Astro a ogni build, così una voce del CV malformata fa fallire la CI invece di pubblicare una pagina rotta.
+
+  - type: divider
+
+  - type: text
+    title: "Cover letter dagli stessi fatti"
+    body: |
+      Il generatore di cover letter riusa gli stessi fatti di carriera come blocchi narrativi, indicizzati per tema. Una candidatura seleziona e ordina i temi che corrispondono a un annuncio, e il renderer produce sia Markdown sia testo semplice reflowed.
+
+      Tenere le lettere a valle di un unico file di fatti significa che una lettera non può mai contraddire silenziosamente il CV a cui è allegata.
+
+  - type: divider
+
+  - type: text
+    title: "Packaging e distribuzione"
+    body: |
+      Il tutto è un'immagine Docker multi-stage: la build di Astro e dei documenti gira nell'immagine ufficiale di Playwright — il browser è già presente, quindi non c'è nessuno step di download — e il risultato è servito da `nginx-unprivileged`.
+
+      GitLab CI ha due job. `validate` esegue i test di regressione su contenuti e formattazione e una build completa a ogni push; è il gate che tiene uno YAML difettoso lontano da `main`. `container` gira solo sui tag e pubblica l'immagine sul GitLab Container Registry, così una release è un tag invece di un artefatto costruito a mano.
+
+      Il deployment è GitOps: l'image automation di Flux rileva il nuovo tag e lo distribuisce, così lo stesso tag che è stato validato è il tag che gira.
+
+  - type: divider
+
+  - type: text
+    title: "Cosa ne ho tratto"
+    body: |
+      Il lavoro interessante è stato rendere la pipeline la fonte di verità. Un CV è una scusa sorprendentemente buona per esercitare la stessa disciplina che applico all'infrastruttura di prodotto: un input, output riproducibili, contenuti validati al momento della build e una release che è un tag revisionato invece di uno step manuale.
+
+links:
+  - label: Sito live
+    url: https://cv.eathtespagheti.eu
+  - label: Sorgente
+    url: https://gitlab.com/eathtespagheti/cv

@@ -1,0 +1,124 @@
+---
+//
+//  blocks/ImageBlock.astro
+//  CV Hub — Image block
+//
+//  Created by Alexander Gusarov on 31.03.2026.
+//  @spartan121
+//
+//  All fields optional.
+//  If src is missing — renders text content only (if any).
+//  anchor: optional id for deep-linking (e.g. /projects/cv-hub#quickstart).
+//  `backtick` spans in title/subtitle/body/caption render as styled <code>
+//  (see InlineText.astro).
+//  eager: set by ProjectPage for the first image block on the page (likely
+//  the hero shot under the title, and the page's LCP element) — every other
+//  image block stays lazy.
+//  natural: render the image at its own aspect ratio instead of the default
+//  16:9 cover crop — for diagrams and tall screenshots, which would otherwise
+//  be centre-cropped.
+//
+
+import InlineText from './InlineText.astro';
+
+const { src, alt, caption, title, subtitle, body, anchor, eager = false, natural = false } = Astro.props;
+
+const hasText = title || subtitle || body || caption;
+const hasSrc  = !!src;
+if (!hasText && !hasSrc) return;
+
+const withBase = (p = '') => {
+  const s = String(p);
+  if (!s) return '';
+  if (/^(https?:)?\/\//i.test(s) || s.startsWith('data:')) return s;
+  const clean = s.replace(/^\/+/, '');
+  const base = String(import.meta.env.BASE_URL || '/');
+  return (base.endsWith('/') ? base : base + '/') + clean;
+};
+---
+
+<div class="image-block" id={anchor || undefined}>
+  {title    && <h2 class="image-block__title"><InlineText text={title} /></h2>}
+  {subtitle && <p  class="image-block__subtitle"><InlineText text={subtitle} /></p>}
+  {body     && <p  class="image-block__body"><InlineText text={body} /></p>}
+
+  {hasSrc && (
+    <figure class:list={['image-block__figure', natural && 'image-block__figure--natural']}>
+      <img
+        src={withBase(src)}
+        alt={alt ?? title ?? ''}
+        loading={eager ? 'eager' : 'lazy'}
+        fetchpriority={eager ? 'high' : undefined}
+        class:list={['image-block__img', natural && 'image-block__img--natural']}
+        onerror="this.closest('figure')?.remove();"
+      />
+      {caption && (
+        <figcaption class="image-block__caption"><InlineText text={caption} /></figcaption>
+      )}
+    </figure>
+  )}
+</div>
+
+<style>
+   .image-block {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    scroll-margin-top: 84px;
+  }
+
+  .image-block__title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .image-block__subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .image-block__body {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  .image-block__figure {
+    margin: 0;
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    /* Reserve space before the image loads — avoids layout shift. Actual
+       images vary, but 16:9 is the closest single guess (matches the
+       VideoBlock convention) and object-fit: cover below crops gracefully
+       either way. */
+    aspect-ratio: 16 / 9;
+  }
+
+  .image-block__img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+
+  /* Opt-in: skip the 16:9 crop and render at the image's intrinsic aspect
+     ratio (diagrams, tall screenshots). */
+  .image-block__figure--natural { aspect-ratio: auto; }
+
+  .image-block__img--natural { height: auto; object-fit: contain; }
+
+  .image-block__caption {
+    display: block;
+    font-size: 12px;
+    padding: 8px 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+  }
+</style>

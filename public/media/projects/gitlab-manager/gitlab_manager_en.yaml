@@ -1,0 +1,43 @@
+title: "gitlab-manager — A Bash Client for the GitLab API"
+role: "Author"
+year: "2021"
+tagline: "A dependency-light CLI for cloning, listing, searching and creating GitLab projects."
+shareable: true
+
+platforms: [CLI]
+stack: [Bash, GitLab REST API, curl, jq]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      Managing a growing set of personal GitLab projects and groups through the web interface is tedious: creating a repository, setting its visibility, or finding which of a dozen projects matches a name all mean several clicks. gitlab-manager wraps those operations in one small Bash script so they can be done — and scripted — from the terminal.
+
+  - type: divider
+
+  - type: text
+    title: "What it does"
+    body: |
+      A single entry point exposes a handful of actions:
+
+      - `clone` a project by its path
+      - `list` every project, optionally showing only one field (name, description, path, url)
+      - `search` across projects, with quoted phrases
+      - `new` to create a project with a name, description, path and visibility — including seeding it from a local repository
+      - `update` to refresh the local project cache
+
+      Bash completion is shipped alongside the script.
+
+  - type: divider
+
+  - type: text
+    title: "How it works"
+    body: |
+      It talks to the GitLab REST API v4 with curl, parses responses with jq, and authenticates with a personal token supplied on the command line or through the environment. A local JSON cache, refreshed by the update action, keeps repeated listings fast and lets the completion work without a round trip.
+
+      No SDK, no language runtime — only Bash, curl and jq, which are present on essentially any machine I would run it on.
+
+links:
+  - label: Source
+    url: https://gitlab.com/eathtespagheti/gitlab-manager

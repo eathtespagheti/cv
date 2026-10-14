@@ -1,0 +1,28 @@
+title: "Club Inferno CMS"
+role: "Developer"
+year: "2017"
+tagline: "A venue CMS written twice — once in raw PHP, then properly in Django."
+shareable: true
+
+platforms: [Web]
+stack: [PHP, Django, Python, HTML, Bootstrap]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      The final diploma project at ITI Angioy: a content management system for a local venue. The original was written in PHP with no framework at all, and some months after the first release it was rewritten as a Django project.
+
+      Rewriting your own project once you know what you did not understand the first time is an unusually useful exercise — and both versions remain available on GitLab.
+
+  - type: divider
+
+  - type: text
+    title: "What the rewrite taught me"
+    body: |
+      The first version worked and was finished. Rewriting it meant working inside a framework's conventions rather than around them, which is a different and more transferable skill than the original ever asked for.
+
+links:
+  - label: GitLab Profile
+    url: https://gitlab.com/eathtespagheti

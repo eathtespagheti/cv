@@ -1,0 +1,105 @@
+---
+//
+//  blocks/TextBlock.astro
+//  CV Hub — Text block
+//
+//  Created by Alexander Gusarov on 31.03.2026.
+//  @spartan121
+//
+//  All fields optional. Renders only what's present.
+//  anchor: optional id for deep-linking (e.g. /projects/cv-hub#quickstart).
+//  Inline `code`/**bold**/*italic* in title/subtitle/body/bullets render as real
+//  elements (see InlineText.astro). `body` is further split into paragraphs and
+//  `- ` bullet lists (see parseBodyBlocks in inline-format.ts).
+//
+
+import InlineText from './InlineText.astro';
+import { parseBodyBlocks } from '../../scripts/inline-format';
+
+const { title, subtitle, body, bullets = [], links = [], anchor } = Astro.props;
+
+// `body` is authored as a small Markdown subset — paragraphs separated by blank
+// lines, `- ` bullet lists, plus inline `code`/**bold**/*italic* (see
+// inline-format.ts). Rendered as real elements, never set:html.
+const bodyBlocks = parseBodyBlocks(body);
+
+const hasContent = title || subtitle || bodyBlocks.length > 0 || bullets.length > 0 || links.length > 0;
+if (!hasContent) return;
+---
+
+<div class="text-block" id={anchor || undefined}>
+  {title    && <h2 class="text-block__title"><InlineText text={title} /></h2>}
+  {subtitle && <p  class="text-block__subtitle"><InlineText text={subtitle} /></p>}
+
+  {bodyBlocks.map((block) => (
+    block.type === 'list'
+      ? <ul class="text-block__bullets">
+          {block.items.map((item: string) => <li><InlineText text={item} /></li>)}
+        </ul>
+      : <p class="text-block__body"><InlineText text={block.text} /></p>
+  ))}
+
+  {bullets.length > 0 && (
+    <ul class="text-block__bullets">
+      {bullets.map((b: string) => <li><InlineText text={b} /></li>)}
+    </ul>
+  )}
+
+  {links.filter((l: any) => l?.url).length > 0 && (
+    <div class="text-block__links">
+      {links.filter((l: any) => l?.url).map((l: any) => (
+        <a class="link" href={l.url} target="_blank" rel="noopener">{l.label}</a>
+      ))}
+    </div>
+  )}
+</div>
+
+<style>
+  .text-block {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scroll-margin-top: 84px;
+  }
+
+  .text-block__title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .text-block__subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .text-block__body {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  .text-block__bullets {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .text-block__bullets li {
+    margin-bottom: 4px;
+  }
+
+  .text-block__bullets li::marker {
+    color: var(--accent);
+  }
+
+  .text-block__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+</style>

@@ -1,0 +1,50 @@
+title: "C Data Structures — ADT di prima classe in C"
+role: "Autore"
+year: "2020"
+tagline: "Un insieme di librerie di strutture dati basate su puntatori, ognuna delle quali può essere usata autonomamente."
+shareable: true
+
+platforms: [Library, Linux]
+stack: [C, Make, Git submodules]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      Ho scritto queste strutture mentre studiavo e poi le ho ripulite abbastanza da condividerle. Il vincolo che mi ero imposto era trattare ogni struttura come un tipo di dato astratto di prima classe: il contenitore è opaco, memorizza puntatori, e le operazioni vengono fornite tramite puntatori a funzione. Così le librerie restano generiche senza macro né codice generato.
+
+  - type: divider
+
+  - type: text
+    title: "Le librerie"
+    body: |
+      Ogni struttura vive nel proprio repository ed è montata qui come git submodule, così ognuna può essere clonata e usata senza le altre:
+
+      - **Array** — un array dinamico
+      - **ArrayListConversionLib** — conversioni tra array e liste
+      - **Lists** — una `Shortlist` a singolo collegamento e una `List` a doppio collegamento
+      - **BSTs** — un `BST` semplice e un `AdvancedBST`
+      - **SymbleTable** — una symbol table basata su array dinamico
+      - **CUtils** — funzioni di utilità generiche
+      - **TypesCollection** — wrapper per i tipi primitivi (Integer, Double, Float, Number)
+
+  - type: divider
+
+  - type: text
+    title: "Note di progettazione"
+    body: |
+      Il codice fa ampio affidamento su puntatori e puntatori a funzione, che è poi tutto l'esercizio: l'utente fornisce le funzioni di confronto, copia e free, e la struttura non ha mai bisogno di sapere cosa sta contenendo. I commenti sono in parte in italiano, e il repository include una configurazione di clang-format.
+
+      A causa dei submodule, è necessario un clone ricorsivo per scaricare l'insieme completo.
+
+  - type: divider
+
+  - type: text
+    title: "Perché è qui"
+    body: |
+      È il progetto meno appariscente che abbia pubblicato, ed è proprio questo il punto: la gestione manuale della memoria, i tipi opachi e la progettazione di un'API che resta utile senza conoscere il tipo del payload sono fondamentali che ricompaiono nel lavoro sui sistemi che faccio oggi.
+
+links:
+  - label: Sorgente
+    url: https://github.com/eathtespagheti/C-Data-Structures

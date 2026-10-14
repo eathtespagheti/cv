@@ -1,0 +1,63 @@
+title: "GitLab ⇄ GitHub Mirror"
+role: "Author / Operator"
+year: "2026 — present"
+tagline: "A single POSIX shell script that reconciles a personal GitLab and GitHub account and keeps them mirrored — on the free tier, with GitLab canonical."
+shareable: true
+
+platforms: [CLI, Linux]
+stack: [POSIX Shell, GitLab REST API, GitHub REST API, gh, glab, git, systemd]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      I host most of my projects on GitLab but use GitHub for visibility, forks and contributions, and over time the two accounts drifted: repositories missing from one side, mirrors that had quietly stopped, histories that had diverged. Reconciling that by hand, project by project, was tedious and easy to get wrong.
+
+      The free tier decides the design. GitLab can push to GitHub server-side — a push mirror — on every plan, but pull mirroring, GitHub into GitLab, is Premium and Ultimate only, and GitHub offers no ongoing server-side mirror for `github.com` at all. So the tool makes GitLab canonical and covers the other direction with a scheduled safety net.
+
+  - type: divider
+
+  - type: text
+    title: "What it does"
+    body: |
+      One POSIX `sh` script with three commands:
+
+      - `audit` enumerates both accounts and reports drift read-only: repositories that exist on only one side, missing, disabled or errored push mirrors, duplicate mirrors, visibility mismatches, empty repositories and divergent histories. It prints either human-readable lines, a machine-readable JSON object, or a non-zero exit code when any drift bucket is non-empty.
+      - `setup` prints a plan first and, after confirmation, creates the missing counterpart repository, seeds a new GitLab project from GitHub where needed, and configures or repairs the GitLab-to-GitHub push mirror.
+      - `sync` is the recurring safety net: it fetches both hosts into a local cache and fast-forwards commits that landed on GitHub back into GitLab, so work pushed straight to GitHub is not stranded there.
+
+  - type: divider
+
+  - type: text
+    title: "How it works"
+    body: |
+      GitLab-to-GitHub is a native server-side push mirror configured through the `remote_mirrors` API, so GitLab publishes to GitHub without any machine of mine running. The GitHub-to-GitLab direction is the scheduled `sync`: a bare cache repository per project holds `github` and `gitlab` remotes, and branches are only created or fast-forwarded — GitLab must be an ancestor of the GitHub ref — so the rescue never rewrites history. Tags missing on GitLab are pushed; a same-named tag that differs goes to the conflict policy.
+
+      Where histories truly diverge, GitLab wins by default: only the specific GitHub ref is force-updated from the cached GitLab ref. Every path is deliberately narrow — it never uses a force-mirror push and never deletes a ref. A `mkdir`-based lock makes a second concurrent `sync` fail loudly instead of racing, and the script needs no `jq` binary — the `gh`/`glab` built-in `--jq` filters and `awk` cover the parsing — so its only runtime dependencies are `git`, `gh` and `glab`.
+
+  - type: divider
+
+  - type: text
+    title: "Testing and reliability"
+    body: |
+      The script is checked with `sh -n`, `dash -n`, `shellcheck` and `checkbashisms`, and covered by a hermetic POSIX test suite: fakes for `gh` and `glab` record every call, fixtures model the API responses, and the sync tests run real git against local bare repositories — no network, nothing written to a real account. Assertions cover the drift buckets, refspec-level sync behaviour, conflict policy, seeding safety and pagination.
+
+      The mutating paths are guarded by design: `setup` and `sync` prompt before applying, `--dry-run` prints the plan instead of running it, and the destructive force-align path is explicit opt-in. `audit` never changes a remote.
+
+  - type: divider
+
+  - type: text
+    title: "Scope and trade-offs"
+    body: |
+      The tool is built for one person's personal namespaces and git refs only: it skips groups and organisations, and deliberately ignores issues, merge requests, wikis and releases. Because GitHub offers no ongoing server-side mirror for `github.com`, the GitHub-to-GitLab direction is a scheduled job rather than a live mirror, so it is only as timely as its timer.
+
+      GitLab is canonical by design. Where histories diverge, the default policy force-updates only the specific GitHub ref from GitLab and leaves everything else untouched, and a report-only mode changes neither side. The worst case is a recoverable fast-forward rather than a lost branch.
+
+links:
+  - label: Source (GitLab)
+    url: https://gitlab.com/eathtespagheti/gitlab-mirroring
+    type: repo
+  - label: Source (GitHub)
+    url: https://github.com/eathtespagheti/gitlab-mirroring
+    type: repo

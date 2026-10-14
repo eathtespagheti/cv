@@ -1,0 +1,69 @@
+title: "Self-Service QA Environments"
+role: "Developer"
+year: "2025 — 2026"
+tagline: "One click, fully automated, isolated QA environments for everyone — including people who do not use the terminal."
+shareable: false
+
+platforms: [Internal Web App]
+stack: [Node.js, Flux CD, Kubernetes, Slack API, Docker]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      Our QA environments were requested by developers and created by the infrastructure team. That handoff was the bottleneck: a request in a channel, a reply some minutes later, a manual sequence of steps.
+
+      The QA environment manager removes the handoff. Anyone — including colleagues with no Kubernetes experience — can create, suspend, resume and delete an isolated environment in a few clicks, and the whole lifecycle is automated through Flux.
+
+      Each environment is isolated in its own namespace and served on a dedicated subdomain, so environments never collide; suspending one scales its Deployments, StatefulSets and DaemonSets to zero while keeping it defined.
+
+      I designed and built the application, working directly with the requesting teams so the interface matched how they actually worked.
+
+  - type: divider
+
+  - type: text
+    title: "Deploy tracking"
+    body: |
+      The core screen follows a deployment as it happens, rather than reporting a status afterwards:
+
+      - **Real-time per-pipeline tracking** — each stage of the deployment is visible and updating live
+      - **A foreground deploy modal** spanning the whole chain: build pipelines, then the QA release pipeline, then the health check, so the current stage is unambiguous
+      - **A dedicated failure state** that makes a failed pipeline the obvious next thing to look at, rather than something to hunt for
+
+      Nothing else matters if a person cannot tell what is happening or what broke.
+
+  - type: divider
+
+  - type: text
+    title: "Background operations"
+    body: |
+      Long-running work must survive the user closing a tab, so operations run in the background with an **activity window** showing what is currently happening:
+
+      - Suspend, resume and delete as background operations
+      - A visible activity window, so the user can leave and return without losing track
+
+      A **navigation guard** warns before leaving the page mid-deploy. This sounds trivial, and it is not — without it the most common failure was simply people navigating away during a deploy and losing sight of the result.
+
+  - type: divider
+
+  - type: text
+    title: "Support flow"
+    body: |
+      When something fails, the application helps the user ask for help rather than leaving them to describe the problem from memory:
+
+      - A **one-click Slack support flow** that opens a request in the support channel with the context already attached
+      - The support message carries the **last log lines of the failed pipeline**, which was explicitly requested by the platform team
+
+      Attaching the failing log tail turned support requests from a back-and-forth into a single message with the actual evidence in it.
+
+  - type: divider
+
+  - type: text
+    title: "Notifications"
+    body: |
+      Deployments finish long after people have looked away, so an **inactive-tab notification** surfaces completion and failure without requiring the tab to be in the foreground.
+
+      Small touches like this are most of the difference between a tool people use and a tool people work around.
+
+links: []

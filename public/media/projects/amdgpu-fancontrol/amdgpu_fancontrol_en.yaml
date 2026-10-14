@@ -1,0 +1,44 @@
+title: "amdgpu-fancontrol — AMD GPU Fan Control in C"
+role: "Author"
+year: "2021"
+tagline: "A small userspace daemon that drives AMD GPU fan curves through the sysfs hwmon interface."
+shareable: true
+
+platforms: [Linux]
+stack: [C, Make, sysfs]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      On the open-source amdgpu driver the GPU fan is managed by the kernel, and the default curve is conservative: quiet until the card is already hot, then loud. I wanted the machine to ramp smoothly and to keep the temperature where I chose, so I wrote a small daemon that owns the fan and drives it directly.
+
+      It is deliberately low-tech: no framework, no runtime dependency, just C talking to the kernel's sysfs interface.
+
+  - type: divider
+
+  - type: text
+    title: "How it works"
+    body: |
+      The daemon reads the current temperature from the card's hwmon device and writes a speed value back to the corresponding PWM control, on a loop. The pieces are split into small modules:
+
+      - a card manager that enumerates the cards and their hwmon instances
+      - a fan-fork manager for setups where several fans or cards are controlled together
+      - a temperature-to-speed map with configurable breakpoints
+      - parameter and parameter-management modules, plus a small logging layer
+
+      Everything is addressed by the standard `/sys/class/drm/card*/.../hwmon/...` paths, so there is no vendor tooling involved.
+
+  - type: divider
+
+  - type: text
+    title: "Build and shape"
+    body: |
+      A plain Makefile compiles each module and links the main binary — by default with `tcc`, so the whole thing builds almost instantly. The code is GPLv3.
+
+      It is the smallest project here, but a representative one: direct hardware access, explicit memory and pointer handling, and a design split along responsibility lines rather than one big file.
+
+links:
+  - label: Source
+    url: https://gitlab.com/eathtespagheti/amdgpu-fancontrol

@@ -1,0 +1,50 @@
+title: "Traefik Dynamic Header Plugin"
+role: "Author"
+year: "2025"
+tagline: "A native Traefik middleware that rewrites request and response headers from Go templates."
+shareable: true
+
+platforms: [Traefik Plugin, Go]
+stack: [Go, Traefik, net/http, text/template]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      A Traefik middleware plugin that rewrites request and response headers from
+      configurable rules. Each rule maps a header name to a value written as a Go
+      template, evaluated against either the incoming request (`[[.Host]]`,
+      `[[.Method]]`) or the returning response, so a header can be derived from
+      what the client sent or from what the upstream service set.
+
+      It is a small, focused codebase: a config package, an internal rules package
+      and a thin `http.Handler` that plugs into Traefik's local plugin mechanism.
+      Templates use `[[ ]]` delimiters to stay clear of the surrounding YAML and Go
+      syntax, and a `docker/` compose setup runs the plugin against a local Traefik
+      and a mock upstream for manual testing.
+
+  - type: divider
+
+  - type: text
+    title: "The response-ordering problem"
+    body: |
+      Request headers can be written before the next handler runs, but response
+      headers are often set only when the handler flushes them. The plugin wraps
+      the `http.ResponseWriter` and applies its response rules inside
+      `WriteHeader`, so headers are rewritten at the moment Traefik is about to
+      send them, rather than before the values exist.
+
+  - type: divider
+
+  - type: text
+    title: "Testing"
+    body: |
+      The plugin is covered by unit tests built on `net/http/httptest`: a mock
+      upstream sets headers, and the tests assert request and response rewriting
+      end to end. The internal rules package has its own tests, and the project is
+      linted with `golangci-lint`.
+
+links:
+  - label: Source
+    url: https://github.com/eathtespagheti/traefik-bizaway-headers

@@ -1,0 +1,364 @@
+name: Fabio Sussarellu
+title: Platform Engineer
+photo: /media/profile.jpg
+
+summary: >
+  Platform engineer con oltre 8 anni nel software, gli ultimi 5 su AWS, più
+  recentemente nella gestione di ~24 servizi su una piattaforma Kubernetes (EKS)
+  in un team platform di quattro engineer, incaricato di ricercare e
+  first-implementare i suoi standard di release, image pipeline, deployment e
+  GitOps, con infrastructure as code (Terraform), Flux CD GitOps, CI/CD e
+  osservabilità, e ownership di release engineering e system administration
+  aziendale, con ottimizzazione dei costi cloud su un precedente contesto
+  agency.
+
+location: Alghero, Italia (Remoto)
+timezone: Europe/Rome
+
+contacts:
+  - label: sussarellu.fabio@gmail.com
+    url: mailto:sussarellu.fabio@gmail.com
+  - label: linkedin.com/in/fabio-sussarellu
+    url: https://www.linkedin.com/in/fabio-sussarellu-739808154/
+  - label: gitlab.com/eathtespagheti
+    url: https://gitlab.com/eathtespagheti
+  - label: github.com/eathtespagheti
+    url: https://github.com/eathtespagheti
+  - label: cv.eathtespagheti.eu
+    url: https://cv.eathtespagheti.eu
+
+achievements:
+  - Ridotta la spesa AWS mensile da ~€12k a ~€6k sui clienti ospitati su AWS
+  - Gestiti ~24 servizi su tre applicazioni
+  - Aggiornati tre cluster EKS a ogni release minor di Kubernetes, a una settimana di
+    distanza, ruotando i node group tramite surge capacity e PodDisruptionBudget
+    con validazione di add-on e CRD, senza interruzioni visibili agli utenti in
+    produzione
+  - Ridotto il tempo di attesa in coda delle pipeline CI da ~30 minuti nei picchi
+    a ~45–60 secondi
+  - Nominato System Administrator in BizAway, responsabile di autenticazione e
+    autorizzazione, backup e ripristino e misure GDPR Art. 32; remediation di
+    findings di penetration test di terze parti sul backend API principale, su
+    un'app interna e su un servizio interno minore
+  - Guidato un team trasversale di 3 engineer (junior DevOps, stagista e
+    sviluppatore embedded in transizione verso il DevOps), con responsabilità su
+    intake dei progetti, scomposizione dei task ed escalation tecnica
+
+skills:
+  - group: Cloud, Kubernetes e Linux
+    items:
+      - Kubernetes (AWS EKS)
+      - Helm
+      - Flux CD (GitOps)
+      - Kustomize
+      - Karpenter
+      - Cilium eBPF
+      - Traefik
+      - cert-manager
+      - Linux (Arch, Alpine, openSUSE)
+      - systemd
+      - nginx
+      - "AWS: EC2, ECS, EKS, ECR, RDS, S3, IAM, Lambda, EventBridge Scheduler,
+        Parameter Store, Secrets Manager, CloudFront, ELB/ALB"
+
+  - group: CI/CD, container e registry
+    items:
+      - Bitbucket Pipelines
+      - Deploy canary
+      - GitLab CI/CD
+      - Jenkins
+      - GitHub Actions
+      - Bitbucket Pipelines Runners Autoscaler
+      - Quality gate SonarQube
+      - Playwright (test E2E)
+      - Docker
+      - Docker Compose
+      - BuildKit
+      - Dockerfile multi-stage
+      - Build multi-architettura (ARM64)
+      - ECR (pull-through cache, policy di lifecycle)
+      - GHCR
+
+  - group: Infrastructure as Code, segreti e identità
+    items:
+      - Terraform
+      - Moduli Terraform riutilizzabili
+      - Ansible
+      - Infisical
+      - SOPS (age, AWS KMS)
+      - OIDC (pipeline verso AWS)
+      - OAuth2-proxy
+      - Keycloak (OIDC / RBAC)
+      - IAM / RBAC
+      - Backup e disaster recovery
+      - Misure GDPR Art. 32
+
+  - group: Osservabilità e data store
+    items:
+      - Elasticsearch
+      - Logstash / Beats
+      - Kibana
+      - Prometheus
+      - Grafana (creazione di dashboard, provisioning)
+      - APM
+      - Redis (AWS ElastiCache)
+      - PostgreSQL
+      - MongoDB
+      - CloudNativePG
+      - Apache Kafka
+
+  - group: Networking ed edge
+    items:
+      - AWS VPC (subnet, routing, peering, Transit Gateway)
+      - Cloudflare CDN / anti-DDoS
+      - CloudFront
+      - Tailscale
+      - DNS split-horizon
+
+  - group: Programmazione e scripting
+    items:
+      - Bash / POSIX shell
+      - jq
+      - Python (boto3)
+      - Go
+      - TypeScript / Node.js
+      - SQL
+      - Git
+
+experience:
+  - company: BizAway
+    role: Platform Engineer
+    period: Lug 2024 — Presente
+    description:
+      - "Guidata la progettazione e la prima implementazione di uno step di rilascio
+        condiviso su Bitbucket Pipelines, poi esteso a ~24 servizi su tre
+        applicazioni — in sostituzione di pipeline per-progetto incoerenti e
+        difficili da debuggare — riducendo il rischio di rilascio con deploy canary,
+        pipeline di back-merge, un merge check personalizzato e un quality gate
+        SonarQube."
+      - "Costruita la prima versione della pipeline delle immagini Docker —
+        BuildKit, Dockerfile multi-stage, pubblicazione multi-architettura (ARM64) e
+        pull-through cache ECR — poi portata in adozione sui progetti; risolto un
+        incidente di produzione sul limite di pull rate di Docker Hub e introdotte
+        policy di lifecycle ECR per controllare la retention delle immagini."
+      - "Gestiti tre cluster EKS (QA, staging e produzione), aggiornati a ogni
+        release minor di Kubernetes a una settimana di distanza, ruotando i node
+        group tramite surge capacity e PodDisruptionBudget con validazione di add-on
+        e CRD, senza interruzioni visibili agli utenti in produzione. Mantenuto il runbook
+        ufficiale EKS Cluster Upgrade (AWS Upgrade Insights, scansione con
+        kubent/Pluto, validazione della compatibilità degli add-on) come riferimento
+        per ogni upgrade, con i ticket di change conservati come traccia di audit."
+      - "Introdotto il chart Helm interno diventato lo standard per il deploy dei
+        servizi in casa — specifiche, template e migrazione di ~24 servizi su
+        produzione e staging, con Deployment canary, routing pesato su
+        Traefik, validazione dello schema dei values e pipeline di release OCI che
+        blocca le versioni esistenti."
+      - "Guidata la transizione a un modello di delivery GitOps con Flux CD —
+        stabilendo il pattern, poi migrando deploy step e deploy di stage in tutto il
+        team — con Flux che riconcilia ~24 servizi su staging e produzione, segreti
+        cifrati con SOPS e AWS KMS, e ripristino di staging dopo che una
+        kustomization errata ha espulso i deployment gestiti."
+      - "Gestito Terraform su tre ambienti AWS e tre cluster EKS — networking VPC,
+        IAM e OIDC pipeline-to-AWS in tre ambienti, con Infisical come sorgente di
+        segreti per Terraform, SOPS cifrato con AWS KMS nel repo GitOps e AWS
+        Secrets Manager e SSM Parameter Store per i segreti a runtime."
+      - "Distribuito Keycloak via Helm e gestito realm, client OIDC, gruppi e ruoli
+        come codice con il provider Terraform, proteggendo le webapp interne tramite
+        OAuth2-proxy davanti a Keycloak OIDC."
+      - "Progettata e gestita una flotta di runner Bitbucket self-hosted su AWS EC2
+        — runner shell e Docker su ogni istanza, cleanup con systemd e inotify,
+        recupero dello storage in base all'utilizzo e gestione del ciclo di vita di
+        runner/AMI — poi migrata al Bitbucket Pipelines Runners Autoscaler ufficiale
+        — runner containerizzati su Kubernetes — riducendo il tempo di attesa in coda
+        delle pipeline da ~30 minuti nei picchi a ~45–60 secondi al massimo, limitato
+        dal tempo di scale-up dei nodi con Karpenter."
+      - "Gestito lo stack di osservabilità in produzione — Elasticsearch, Kibana,
+        Grafana, APM e alerting Slack — con alert mirati aggiunti al manifestarsi di
+        nuovi tipi di guasto."
+      - "Gestito Redis in produzione su AWS ElastiCache, incluso il comportamento
+        di failover e le policy di eviction e scaling."
+      - "Costruiti ambienti E2E (Playwright, MongoDB, Redis, Elasticsearch, Kafka) e
+        ridotto il tempo delle pipeline E2E da ~20 minuti a ~13 minuti
+        mantenendo persistente la cache Docker/BuildKit sui runner self-hosted."
+      - "Progettato e sviluppato un gestore di ambienti QA self-service che
+        ha sostituito il provisioning basato su ticket — prima mezza giornata (a
+        volte una giornata intera) di lavoro di un infra engineer per ambiente — con
+        creazione, cambio branch ed eliminazione in un clic, orchestrando i manifest
+        Kubernetes tramite Bitbucket Pipelines e Flux CD. Ogni ambiente girava nel
+        proprio namespace, raggiungibile su un sottodominio dedicato di quarto
+        livello; la sospensione portava a zero ogni Deployment, StatefulSet e
+        DaemonSet e la ripresa li ripristinava, mantenendo definito l'ambiente. Fino
+        a ~50 ambienti attivi in contemporanea, ciascuno pronto in ~10 minuti ed
+        eseguendo fino a ~9 servizi."
+      - "Autore di un plugin middleware Traefik in Go che riscrive header di
+        richiesta e risposta da regole Go-template — avvolgendo http.ResponseWriter
+        così che gli header impostati a fine risposta vengano comunque riscritti —
+        per aggirare un limite di cinque origin consentite in uno strumento
+        analytics di terze parti; testato su net/http/httptest e con linting
+        golangci-lint."
+    stack:
+      - AWS EKS
+      - Terraform
+      - Bitbucket Pipelines
+      - Docker
+      - BuildKit
+      - ECR
+      - Flux CD
+      - Helm
+      - Karpenter
+      - Infisical
+      - SOPS
+      - OIDC
+      - Keycloak
+      - Elasticsearch
+      - Redis (AWS ElastiCache)
+      - Logstash
+      - Grafana
+      - systemd
+      - Node.js
+      - Go
+
+  - company: Abika
+    role: Lead DevOps Engineer
+    period: Gen 2023 — Giu 2024
+    description:
+      - "Guidato un team trasversale di 3 engineer (un junior DevOps, uno stagista
+        e uno sviluppatore embedded in transizione verso il DevOps): progettata ogni
+        soluzione e realizzata la prima istanza, poi formato il team per completare
+        il resto, con responsabilità su intake dei progetti, scelta degli approcci in
+        base a costo, affidabilità e performance, e scomposizione del lavoro in task
+        adatti a ciascun engineer."
+      - "Gestiti ~45 clienti su AWS, VPS Contabo a basso costo, DigitalOcean e
+        hardware on-premise. Spostati 24 di loro dall'account AWS condiviso su
+        account dedicati per cliente costruiti da zero con uno stack Terraform
+        riutilizzabile di 13 moduli (networking VPC con peering e Transit Gateway,
+        DNS, ACM, IAM, ELB, SES, database, ECR, ECS, EFS, GitLab, CloudFront,
+        Lambda), mentre il resto restava su Contabo, DigitalOcean e l'account
+        condiviso; con onboarding di quattro nuovi clienti."
+      - "Guidato il team nella migrazione dei workload dei clienti su ~20 cluster
+        ECS (Fargate) — 150+ servizi più Lambda per job di background — sostituendo
+        host EC2/EBS amministrati manualmente e sovradimensionati, dove alcuni
+        database di produzione erano semplici container Postgres su EC2, con
+        un'infrastruttura ibrida su AWS, Contabo, Cloudflare e DigitalOcean gestita
+        con Terraform."
+      - "Standardizzato la delivery di ~50 progetti su GitLab CI/CD e Jenkins con
+        runner self-hosted — build dell'immagine, push su ECR, release su Fargate via
+        AWS CLI — monitorando i runner e amministrando Redis e PostgreSQL (RDS) in
+        produzione."
+      - "Ridotto il Largest Contentful Paint (LCP) del sito WordPress di un cliente
+        da ~27s a ~2s con CloudFront, un proxy Lambda per le immagini che le
+        convertiva in AVIF per la cache del CDN, e un Lambda che preriscaldava la
+        cache richiedendo direttamente dal sito ogni endpoint delle immagini;
+        misurato con Google PageSpeed Insights."
+      - "Serviti ~30 siti WordPress a basso costo da VPS Contabo dietro il piano
+        gratuito di Cloudflare con un unico set di regole di ottimizzazione, e gestiti
+        CloudFront, DNS multi-zona e protezione DDoS su tutto l'ambiente."
+      - "Scritto un playbook Ansible che distribuiva l'applicazione web di una banca
+        in Podman sulle loro VM Red Hat — sviluppato con rollback da snapshot — poi
+        consegnato al loro team IT per l'esecuzione, rispettando una policy che
+        vietava l'accesso di terzi alla loro infrastruttura."
+      - "Ridotta la spesa AWS mensile da ~€12k a ~€6k sui clienti ospitati su AWS
+        ridimensionando la capacità ECS, terminando istanze RDS ed EC2 inattive e
+        duplicate, snapshot, NAT gateway inutilizzati ed Elastic IP non allocati,
+        pianificando lo spegnimento fuori orario di RDS ed ECS di sviluppo e
+        staging di ogni cliente con l'AWS Services Scheduler (il modulo Terraform
+        open source elencato tra i progetti, poi adottato internamente), spostando i
+        deployment di fascia bassa su VPS Contabo e spostando la capacità stabile su
+        AWS Savings Plans con un partner esterno che le gestisce."
+    stack:
+      - AWS ECS
+      - AWS Lambda
+      - Terraform
+      - GitLab CI
+      - Jenkins
+      - Ansible
+      - Redis
+      - AWS RDS
+      - Cloudflare
+      - CloudFront
+      - DigitalOcean
+
+  - company: Of Course Me
+    role: Sviluppatore Software / DevOps
+    period: Set 2021 — Dic 2022
+    description:
+      - "Responsabile del CI/CD e dell'infrastruttura AWS come codice (Terraform)
+        per una piattaforma con un catalogo di oltre 1 milione di corsi online, e
+        sviluppo dei relativi microservizi backend per ricerca, catalogazione e
+        distribuzione."
+      - "Smontato un monolite Symfony — backend, frontend, backoffice e scraping —
+        separando un frontend dedicato e un servizio solo-backend, e trasformando
+        ciascuno dei ~150 scraper di corsi in un microservizio indipendente e
+        distribuibile."
+    stack:
+      - Python
+      - Scrapy
+      - Django
+      - Terraform
+      - AWS
+
+  - company: Abinsula
+    role: DevOps
+    period: Lug 2017 — Ago 2021
+    description:
+      - "Entrato come stagista full-stack developer, poi passato a un ruolo
+        DevOps, con lavoro part-time durante il percorso di laurea in Ingegneria
+        Informatica."
+      - "Scritto pipeline CI/CD con GitLab CI/CD e Jenkins su diversi progetti
+        interni, lavorando con deployment di microservizi su Docker."
+    stack:
+      - Docker
+      - GitLab CI
+      - Jenkins
+
+projects_intro: >
+  Infrastruttura self-hosted, moduli open source e tooling personale, costruiti
+  fuori dal lavoro per imparare nuove tecnologie sul campo — alcuni poi adottati
+  al lavoro:
+
+projects:
+  - name: Homelab Kubernetes avanzato
+    description: Cluster kubeadm single-node (Cilium eBPF, Flux GitOps, SOPS,
+      Keycloak OIDC).
+    url: https://cv.eathtespagheti.eu/projects/kubernetes-homelab
+  - name: Workspace LLM e agentic coding self-hosted
+    description: Piattaforma LLM gestita con GitOps (Open WebUI, gateway MCP
+      MetaMCP, gateway AI OmniRoute, SearxNG, Ollama) dietro Keycloak OIDC.
+    url: https://cv.eathtespagheti.eu/projects/llm-workspace
+  - name: Piattaforma CV e cover letter
+    description: Sito CV basato su YAML, export PDF/DOCX/TXT e generatore di
+      cover letter, containerizzato e distribuito via GitLab CI.
+    url: https://cv.eathtespagheti.eu/projects/cv-platform
+  - name: octopus-prices
+    description: Tracker di tariffe Kubernetes pacchettizzato con Helm e bot
+      Telegram; CronJob orario, ConfigMap come unico datastore, release OCI con
+      GitLab CI.
+    url: https://cv.eathtespagheti.eu/projects/octopus-prices
+  - name: AWS Services Scheduler
+    description: Modulo Terraform open source (nato come progetto personale, poi
+      adottato in Abika) che accende e spegne servizi ECS e istanze RDS con una
+      Lambda e EventBridge Scheduler.
+    url: https://cv.eathtespagheti.eu/projects/aws-service-scheduler
+  - name: teslamate-fuel-roi
+    description: Importatore di prezzi carburante per TeslaMate, solo Italia, e
+      dashboard Grafana provisionate per risparmio carburante e ROI EV, su
+      PostgreSQL.
+    url: https://cv.eathtespagheti.eu/projects/teslamate-fuel-roi
+
+education:
+  - institution: Politecnico di Torino
+    degree: Laurea Triennale in Ingegneria Informatica
+    period: 2017 — 2021
+  - institution: Cambridge Assessment English
+    degree: FCE B2 (First Certificate in English, voto 163)
+  - institution: Istituto Tecnico Industriale G.M. Angioy, Sassari
+    degree: Diploma in Informatica (EQF 4)
+    period: 2012 — 2017
+
+languages:
+  - language: Italiano
+    level: Madrelingua
+  - language: Inglese
+    level: Competenza professionale (B2)
+  - language: Sardo
+    level: Madrelingua
