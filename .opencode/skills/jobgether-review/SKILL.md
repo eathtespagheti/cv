@@ -102,11 +102,14 @@ queue a new review. Captured from a logged-in session (HAR
 | 5 | `GET astroapi/career-coach/results?reportKey=cv-review` | The new review (same read as `cv-review`) |
 
 ```sh
+# After `npm run build` the export carries a content hash, so resolve it first:
+CV=$(ls public/downloads/resume_en.*.pdf | head -1)
+
 # whole loop: upload → index → queue → poll → print the new review
-node src/scripts/jobgether.ts refresh-review resume_en.pdf --out /tmp/jg
+node src/scripts/jobgether.ts refresh-review "$CV" --out /tmp/jg
 
 # the steps on their own
-node src/scripts/jobgether.ts upload resume_en.pdf   # steps 1–2
+node src/scripts/jobgether.ts upload "$CV"   # steps 1–2
 node src/scripts/jobgether.ts request-review         # step 3, then poll to done
 node src/scripts/jobgether.ts progress               # poll the CV task
 ```

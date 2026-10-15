@@ -30,14 +30,15 @@ cover-letters/           ┘                  └─► OG image
 DOCX, TXT, OG image — reads *that* artifact, never the authored source directly. Edit
 the authored source; the artifact is rebuilt.
 
-`npm run build` is six steps, not just `astro build`:
+`npm run build` is seven steps, not just `astro build`:
 
 1. `cv:build` — merges profiles into `public/cv/`
 2. `resume:generate` — DOCX + TXT
 3. `resume:pdf` — recruiter PDF + ATS-safe PDF via Playwright
-4. `astro build` — the static site
-5. `og:generate` — social preview image
-6. `prune:dist` — strips the build-time YAML (CV + case studies) that
+4. `resume:hash` — renames each export to include a content hash
+5. `astro build` — the static site
+6. `og:generate` — social preview image
+7. `prune:dist` — strips the build-time YAML (CV + case studies) that
    `astro build` copied verbatim out of `public/`, so it never ships. The same
    step runs in the Dockerfile; CI's `npm run check:dist` fails if any survives.
 
@@ -193,7 +194,7 @@ node src/scripts/jobgether.ts cv-review --out /tmp/jg     # read the CV review
 node src/scripts/jobgether.ts linkedin-review --out /tmp/jg  # read the LinkedIn report
 node src/scripts/jobgether.ts profile --out /tmp/jg       # read the whole profile
 node src/scripts/jobgether.ts skills terraform            # search the skill autocomplete
-node src/scripts/jobgether.ts refresh-review resume_en.pdf --out /tmp/jg
+node src/scripts/jobgether.ts refresh-review "$(ls public/downloads/resume_en.*.pdf | head -1)" --out /tmp/jg
 node src/scripts/jobgether.ts refresh-linkedin Profile.pdf --linkedin https://www.linkedin.com/in/you
 ```
 
@@ -254,6 +255,11 @@ chromium-1243).
 **`nginx.conf` needs `absolute_redirect off`.** The site links to `/projects` without
 a trailing slash; without this, nginx emits an absolute redirect containing the
 internal port `:8080` and the wrong scheme, which broke `/projects` in production.
+
+**Resume downloads are content-addressed, so `resume:hash` must stay in the build.**
+`/downloads/` is served `immutable`; that is only safe because the filename carries
+a hash of the file's bytes. Remove the `resume:hash` step — or rename an export
+back to its stable name — and returning visitors get a stale CV for a year.
 
 **`.github/scripts/generate-resume.js` is a build dependency** despite the path. Do
 not delete `.github/` or add it to `.dockerignore`.

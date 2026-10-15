@@ -8,6 +8,9 @@
  *    public/downloads/resume_en.docx
  *    public/downloads/resume_ru.docx
  *
+ *  The `resume:hash` step then renames these to carry a content hash
+ *  (`resume_en.1a2b3c4d.docx`) — see src/scripts/downloads.ts.
+ *
  *  Run: node .github/scripts/generate-resume.js
  */
 

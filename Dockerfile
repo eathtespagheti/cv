@@ -47,6 +47,8 @@ COPY src/content/profiles ./src/content/profiles
 COPY src/content/languages ./src/content/languages
 COPY src/scripts/merge.mjs ./src/scripts/merge.mjs
 COPY src/scripts/resume-export-pdf.mjs ./src/scripts/resume-export-pdf.mjs
+COPY src/scripts/downloads.ts ./src/scripts/downloads.ts
+COPY src/scripts/resume-hash.ts ./src/scripts/resume-hash.ts
 COPY .github/scripts/generate-resume.js ./.github/scripts/generate-resume.js
 COPY public/media/profile.jpg ./public/media/profile.jpg
 
@@ -54,6 +56,9 @@ RUN npm run cv:build
 RUN npm run resume:generate
 # Recruiter PDF + ATS-safe PDF.
 RUN npm run resume:pdf
+# Content-address the exports (resume_en.<hash>.pdf) so /downloads/ can be
+# cached immutably. Without this the pages fall back to stable names.
+RUN npm run resume:hash
 
 # --- Site + OG image ----------------------------------------------------------
 # Everything else. Any change here re-runs Astro and the OG render, but the

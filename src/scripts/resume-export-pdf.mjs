@@ -15,6 +15,9 @@
  * Output (per lang[_spec] found in public/cv/, e.g. en, en_devops, ru):
  *   public/downloads/resume_{suffix}.pdf       — two-column, for humans
  *   public/downloads/resume_{suffix}_ats.pdf   — single-column, for ATS parsers
+ *
+ * The `resume:hash` step then renames these to carry a content hash
+ * (`resume_en.1a2b3c4d.pdf`) — see src/scripts/downloads.ts.
  */
 
 import fs from 'node:fs';

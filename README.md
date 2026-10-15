@@ -15,10 +15,14 @@ build-and-serve pipeline below.
 |---|---|
 | Public site | `/` |
 | Case studies | `/projects/<project>/` |
-| Recruiter PDF (two-column) | `/downloads/resume_en.pdf` |
-| ATS-safe PDF (single-column) | `/downloads/resume_en_ats.pdf` |
-| Editable Word | `/downloads/resume_en.docx` |
-| Plain text | `/downloads/resume_en.txt` |
+| Recruiter PDF (two-column) | `/downloads/resume_en.<hash>.pdf` |
+| ATS-safe PDF (single-column) | `/downloads/resume_en_ats.<hash>.pdf` |
+| Editable Word | `/downloads/resume_en.<hash>.docx` |
+| Plain text | `/downloads/resume_en.<hash>.txt` |
+
+The `<hash>` is a prefix of the file's sha256, added by the `resume:hash` build
+step. A changed resume gets a new URL, so the download URLs are content-addressed
+and served `immutable` — a returning visitor never keeps a stale CV.
 
 ## Content model
 

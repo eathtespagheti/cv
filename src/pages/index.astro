@@ -11,6 +11,7 @@ import { join } from 'path';
 import { parse } from 'yaml';
 import { getEntry } from 'astro:content';
 import { makeT } from '../scripts/t';
+import { buildDownloadUrls, resumeStem } from '../scripts/downloads';
 import HomePage from '../components/HomePage.astro';
 
 // --- Config ---
@@ -42,13 +43,11 @@ if (existsSync(cvPath)) {
 
 // --- URLs ---
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const specSuffix = defaultProfile.spec ? `_${defaultProfile.spec}` : '';
-const downloadUrls = {
-  pdf:    `${base}/downloads/resume_${defaultLang}${specSuffix}.pdf`,
-  pdfAts: `${base}/downloads/resume_${defaultLang}${specSuffix}_ats.pdf`,
-  docx:   `${base}/downloads/resume_${defaultLang}${specSuffix}.docx`,
-  txt:    `${base}/downloads/resume_${defaultLang}${specSuffix}.txt`,
-};
+const downloadUrls = buildDownloadUrls(
+  base,
+  resumeStem(defaultLang, defaultProfile.spec),
+  join(process.cwd(), 'public/downloads'),
+);
 ---
 
 <HomePage
