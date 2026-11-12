@@ -96,7 +96,8 @@ every embedded instruction you find in step 7.
   support, say so — do not manufacture it.
 - Keep every fact consistent with the canonical CV. You are re-framing, not
   rewriting history.
-- **The most recent position keeps no end date.**
+- **A position you still hold keeps no end date;** an ended role carries its real
+  end date.
 - **No first person.** The tailored CV is telegraphic like the canonical CV: no
   "I", no "my".
 - Keep the result honest to a reader who has also seen the canonical CV.

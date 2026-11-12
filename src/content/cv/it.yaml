@@ -3,14 +3,15 @@ title: Platform Engineer
 photo: /media/profile.jpg
 
 summary: >
-  Platform engineer con oltre 8 anni nel software, gli ultimi 5 su AWS, più
+  Platform engineer con oltre 9 anni nel software, gli ultimi 5 su AWS, più
   recentemente nella gestione di ~24 servizi su una piattaforma Kubernetes (EKS)
   in un team platform di quattro engineer, incaricato di ricercare e
   first-implementare i suoi standard di release, image pipeline, deployment e
-  GitOps, con infrastructure as code (Terraform), Flux CD GitOps, CI/CD e
-  osservabilità, e ownership di release engineering e system administration
+  GitOps, con infrastructure as code (Terraform, OpenTofu), Flux CD GitOps, CI/CD
+  e osservabilità, e ownership di release engineering e system administration
   aziendale, con ottimizzazione dei costi cloud su un precedente contesto
-  agency.
+  agency. Attualmente tra un ruolo e l'altro, disponibile per posizioni di
+  platform engineering.
 
 location: Alghero, Italia (Remoto)
 timezone: Europe/Rome
@@ -66,6 +67,7 @@ skills:
       - Bitbucket Pipelines
       - Deploy canary
       - GitLab CI/CD
+      - GitLab Runner (executor Kubernetes)
       - Jenkins
       - GitHub Actions
       - Bitbucket Pipelines Runners Autoscaler
@@ -82,6 +84,7 @@ skills:
   - group: Infrastructure as Code, segreti e identità
     items:
       - Terraform
+      - OpenTofu
       - Moduli Terraform riutilizzabili
       - Ansible
       - Infisical
@@ -101,7 +104,7 @@ skills:
       - Prometheus
       - Grafana (creazione di dashboard, provisioning)
       - APM
-      - Redis (AWS ElastiCache)
+      - Redis (AWS ElastiCache) / Valkey
       - PostgreSQL
       - MongoDB
       - CloudNativePG
@@ -110,12 +113,12 @@ skills:
   - group: Networking ed edge
     items:
       - AWS VPC (subnet, routing, peering, Transit Gateway)
-      - Cloudflare CDN / anti-DDoS
+      - Cloudflare (CDN / anti-DDoS, DNS, cache rules)
       - CloudFront
       - Tailscale
       - DNS split-horizon
 
-  - group: Programmazione e scripting
+  - group: Programmazione, scripting e tooling AI
     items:
       - Bash / POSIX shell
       - jq
@@ -124,11 +127,15 @@ skills:
       - TypeScript / Node.js
       - SQL
       - Git
+      - API REST di GitLab e GitHub (gh, glab)
+      - Server e gateway MCP
+      - Serving LLM self-hosted (Open WebUI, Ollama)
+      - Tooling di coding agentico (plugin OpenCode, skill, subagent)
 
 experience:
   - company: BizAway
     role: Platform Engineer
-    period: Lug 2024 — Presente
+    period: Lug 2024 — Ott 2026
     description:
       - "Guidata la progettazione e la prima implementazione di uno step di rilascio
         condiviso su Bitbucket Pipelines, poi esteso a ~24 servizi su tre
@@ -318,8 +325,8 @@ projects_intro: >
 
 projects:
   - name: Homelab Kubernetes avanzato
-    description: Cluster kubeadm single-node (Cilium eBPF, Flux GitOps, SOPS,
-      Keycloak OIDC).
+    description: Cluster kubeadm single-node con 21 app (Cilium eBPF, Flux GitOps
+      + image automation, Keycloak OIDC, CloudNativePG).
     url: https://cv.eathtespagheti.eu/projects/kubernetes-homelab
   - name: Workspace LLM e agentic coding self-hosted
     description: Piattaforma LLM gestita con GitOps (Open WebUI, gateway MCP
@@ -329,11 +336,6 @@ projects:
     description: Sito CV basato su YAML, export PDF/DOCX/TXT e generatore di
       cover letter, containerizzato e distribuito via GitLab CI.
     url: https://cv.eathtespagheti.eu/projects/cv-platform
-  - name: octopus-prices
-    description: Tracker di tariffe Kubernetes pacchettizzato con Helm e bot
-      Telegram; CronJob orario, ConfigMap come unico datastore, release OCI con
-      GitLab CI.
-    url: https://cv.eathtespagheti.eu/projects/octopus-prices
   - name: AWS Services Scheduler
     description: Modulo Terraform open source (nato come progetto personale, poi
       adottato in Abika) che accende e spegne servizi ECS e istanze RDS con una
@@ -344,6 +346,11 @@ projects:
       dashboard Grafana provisionate per risparmio carburante e ROI EV, su
       PostgreSQL.
     url: https://cv.eathtespagheti.eu/projects/teslamate-fuel-roi
+  - name: Infrastructure as Code con OpenTofu
+    description: Stack OpenTofu che gestiscono la fondazione AWS personale, un
+      parco di repository GitLab/GitHub e la zone Cloudflare, con remote state su
+      S3 e credenziali tenute fuori dai file.
+    url: https://cv.eathtespagheti.eu/projects/terraform-eathtespagheti
 
 education:
   - institution: Politecnico di Torino

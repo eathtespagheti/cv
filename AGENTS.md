@@ -12,7 +12,7 @@ a public website, a recruiter PDF, an ATS-safe PDF, a DOCX and plain text.
 | Source | `gitlab.com/eathtespagheti/cv` (public) |
 | Live | `https://cv.eathtespagheti.eu` |
 | Hosting | home cluster — `home-cluster/flux/apps/cv/`, namespace `cv` |
-| Runs | `registry.gitlab.com/eathtespagheti/cv:v1.2.7` |
+| Runs | `registry.gitlab.com/eathtespagheti/cv:v1.19.0` |
 | Upstream | fork of `github.com/KeeGooRoomiE/cv_hub` (MIT, attribution in `LICENSE`) |
 
 ## How it works
@@ -81,10 +81,10 @@ Preview locally with `npm run dev`.
 Deployment is automatic. Only tagged releases produce an image:
 
 ```sh
-git tag -a v1.2.8 -m "..." && git push --tags
+git tag -a vX.Y.Z -m "..." && git push --tags
 ```
 
-CI builds and pushes `v1.2.8`, then Flux's `ImagePolicy` picks it up and commits the
+CI builds and pushes `vX.Y.Z`, then Flux's `ImagePolicy` picks it up and commits the
 new tag into `home-cluster/flux/apps/cv/release.yaml`. Nothing else to do.
 
 **The image tag is the git tag.** Tag pipelines only — do not "fix" this to build on
@@ -218,10 +218,14 @@ Keep the cookie in `~/.config/jobgether/cookie` (outside the repo). Cookies and
 
 ## Constraints and gotchas
 
-**Do not add an end date to the most recent position.** The latest experience
-entry reads `<start> - Present` deliberately. There is an employment dispute in
-progress and the dismissal may be reversed; this is a rule about the latest
-role, whichever role that is. This is a deliberate decision — do not "correct" it.
+**The most recent position carries no end date while it is still current.** A
+role you still hold reads `<start> - Present` deliberately: there is an employment
+dispute in progress and the dismissal may be reversed, so the latest role,
+whichever it is, is never closed off. **Once a role has actually ended, give it its
+real end date** — the rule protects a live employment, not a finished one, and a CV
+that still claims a job you have left is simply false. A future role inherits the
+rule for as long as it lasts. This is a deliberate decision — do not "correct" it
+in either direction.
 
 **Voice is per surface.** The CV (`src/content/cv/en.yaml`) and the project card
 descriptions (`src/content/projects/projects_en.yaml`) are telegraphic and use **no

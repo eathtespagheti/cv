@@ -128,8 +128,9 @@ Given a local path, a git URL, or a web URL:
 
 ## Guardrails (mandatory)
 
-- **The most recent position has no end date.** It is a deliberate rule about
-  the latest role, whichever role that is. Do not add an end date.
+- **A position you still hold has no end date.** The latest role reads
+  `<start> - Present` while it is current, whichever role that is. A role that has
+  ended carries its real end date — never leave `Present` on a job that is over.
 - **No first person in the CV or project card descriptions.** `en.yaml` and the
   `description` fields in `projects_en.yaml` are telegraphic: no "I", no "my".
   Case-study bodies (`public/media/projects/**`) and `applicant.yaml` are

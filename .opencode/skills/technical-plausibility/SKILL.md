@@ -169,10 +169,11 @@ No file is written, nothing is edited. Report only.
 
 ## 8. Repo guardrails (this repository, mandatory)
 
-- **Known deliberate conventions — do not report as errors:** the most recent role
-  reads `Present` with no end date (there is an open employment dispute and the
-  dismissal may be reversed — never editorialise on it); there is no phone number
-  (email only); the CV layout is deliberately plain/ATS-safe; the CV is telegraphic
+- **Known deliberate conventions — do not report as errors:** a role that is still
+  current reads `Present` with no end date (there is an open employment dispute and
+  the dismissal may be reversed — never editorialise on it), while an ended role
+  carries its real end date and flagging that is not a finding; there is no phone
+  number (email only); the CV layout is deliberately plain/ATS-safe; the CV is telegraphic
   and uses no first person while the cover letter uses "I"; the CV carries no
   invented metrics.
 - **Keep personal data out.** Never ask for salary, colleague names, or internal

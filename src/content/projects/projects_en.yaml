@@ -6,45 +6,48 @@ projects:
     year: "2019 — present"
     description: >
       A single-node homelab built on kubeadm, evolved from a legacy
-      Docker host. Fully declarative and GitOps-managed with Flux; all secrets
-      encrypted at rest with SOPS and age. Cilium provides eBPF-based networking
-      as a complete kube-proxy replacement, with L2 announcements, L7 ingress
-      controllers and Gateway API routing. Split-horizon DNS via k8s-gateway with
-      Quad9 DoT upstream and Cloudflare DDNS for external access. Central IAM via
-      Keycloak with OIDC, Google IdP federation and custom RBAC across self-hosted
-      services, plus a self-hosted Headscale control plane for cross-site
-      tunnels with embedded DERP relays. A single forwarded ingress is the only
-      public entry point; every other service is LAN/VPN-only. Certificates are
-      issued automatically by cert-manager, and Prometheus/Grafana provide
-      in-cluster monitoring.
+      Docker host and now running 21 applications on 16 platform components.
+      Fully declarative and GitOps-managed with Flux, from the Flux Operator to
+      image automation that commits new tags back to Git. Cilium provides
+      eBPF-based networking as a complete kube-proxy replacement, with LB-IPAM,
+      L2 announcements, Gateway API routing and Hubble; split-horizon DNS via
+      k8s-gateway and Cloudflare DDNS keep a single forwarded ingress as the only
+      public entry point. Keycloak is the central IdP - Google IdP federation,
+      group-mapped RBAC and realms declared through keycloak-config-cli - with
+      OIDC on the apps and oauth2-proxy where they lack it. CloudNativePG runs
+      nine Postgres clusters, kube-prometheus-stack with provisioned dashboards,
+      recording rules and blackbox probes covers monitoring, a self-hosted
+      GitLab Runner with the Kubernetes executor builds the projects, and
+      Headscale provides cross-site tunnels.
     category: Infrastructure
     theme: blue
     featured: true
     platforms: [Kubernetes, Linux, Self-hosted]
-    tags: [kubernetes, cilium, ebpf, gitops, flux, sops, keycloak, oidc, cert-manager, headscale, gateway-api, prometheus, hubble, homelab]
+    tags: [kubernetes, cilium, ebpf, gitops, flux, sops, keycloak, oidc, cnpg, gitlab-runner, cert-manager, headscale, gateway-api, prometheus, grafana, hubble, homelab]
     metrics:
-      - label: Orchestrator
-        value: kubeadm (single node)
+      - label: Workloads
+        value: 21 apps, 16 platform components
       - label: Networking
-        value: Cilium eBPF
+        value: Cilium eBPF + Gateway API
       - label: Public surface
         value: One forwarded ingress
       - label: Identity
         value: Keycloak OIDC / RBAC
-      - label: Secrets
-        value: SOPS + age
+      - label: Data
+        value: 9 CloudNativePG clusters
     stack:
       - Kubernetes (kubeadm)
       - Cilium eBPF
       - Flux Operator + Flux CD
       - SOPS + age
       - cert-manager / Let's Encrypt
-      - Keycloak
-      - Headscale / Tailscale
+      - Keycloak + keycloak-config-cli
+      - Headscale / Headplane
       - Gateway API
       - CloudNativePG (PostgreSQL)
       - k8s-gateway
-      - Prometheus / Grafana
+      - kube-prometheus-stack
+      - GitLab Runner (Kubernetes executor)
       - Hubble
       - Cloudflare DDNS
       - Quad9 DoT
@@ -734,4 +737,83 @@ projects:
         type: repo
       - label: Source (GitHub)
         url: https://github.com/eathtespagheti/gitlab-mirroring
+        type: repo
+
+  - slug: terraform-eathtespagheti
+    order: 19
+    name: OpenTofu Infrastructure as Code
+    role: Author / Operator
+    year: "2023 — present"
+    description: >
+      Three OpenTofu stacks for a personal AWS foundation and the forges beside
+      it: one creates the versioned S3 state bucket and publishes the shared
+      values, one manages the GitLab projects and their GitHub mirrors with
+      server-side push mirrors, and one owns the Cloudflare zone - DNS records,
+      Cache Rules and stale-if-error serving. State is S3-native with lockfile
+      locking, and no credential sits in a file on disk: the GitHub and
+      Cloudflare tokens arrive through sops exec-env, and the GitLab token is
+      minted from glab at apply time.
+    category: Infrastructure
+    theme: blue
+    platforms: [AWS, Cloudflare, GitLab, GitHub]
+    tags: [opentofu, terraform, aws, cloudflare, gitlab, github, sops, iac, remote-state, workspaces, dns]
+    metrics:
+      - label: Stacks
+        value: 3 (shared, gitsync, cloudflare)
+      - label: Repositories
+        value: 71 defined, 24 maintained
+      - label: State
+        value: S3 remote state, lockfile locking
+      - label: Secrets
+        value: SOPS + age, glab-minted token
+    stack:
+      - OpenTofu
+      - AWS provider
+      - GitLab provider
+      - GitHub provider
+      - Cloudflare provider
+      - S3 remote state
+      - SOPS + age
+      - glab
+
+  - slug: opencode-custom
+    order: 20
+    name: OpenCode Agentic Tooling Plugin
+    role: Author / Maintainer
+    year: "2026 — present"
+    description: >
+      An installable plugin that carries a personal agentic-coding setup across
+      machines. It registers three skills, two slash commands and a docs-keeping
+      subagent through the OpenCode plugin API, arms an unattended overnight mode
+      per session with a re-injected contract, a handover notice and a sidebar
+      badge in the TUI, and builds a per-repository edit fence from each
+      project's own config file. Plain ESM with no runtime dependencies; the
+      SolidJS TUI entry is compiled and committed, and the package is tested
+      against a mock plugin context.
+    category: Developer Tooling
+    theme: cyan
+    platforms: [CLI, Node.js]
+    tags: [opencode, plugin, agentic-coding, nodejs, esm, solidjs, tui, skills, subagents, gitlab]
+    metrics:
+      - label: Registers
+        value: 3 skills, 2 commands, 1 subagent
+      - label: Runtime deps
+        value: None (plain ESM)
+      - label: State
+        value: Per-session, per-project
+      - label: Tests
+        value: Mock plugin context
+    stack:
+      - JavaScript (ESM)
+      - OpenCode plugin API
+      - SolidJS / OpenTUI
+      - Babel (build only)
+      - Node.js
+      - Python 3 (docs checker)
+    links:
+      - label: Source (GitLab)
+        url: https://gitlab.com/eathtespagheti/opencode-custom
+        type: repo
+      - label: Source (GitHub)
+        url: https://github.com/eathtespagheti/opencode-custom
         type: repo

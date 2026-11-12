@@ -87,10 +87,11 @@ No file is written and nothing is edited.
 
 ## Guardrails
 
-- **Known deliberate conventions — do not report as errors:** the most recent role
-  reads `Present` with no end date; no phone number; deliberately plain ATS-safe
-  layout; telegraphic CV with no first person; no invented metrics. Do not demand
-  numbers that do not exist.
+- **Known deliberate conventions — do not report as errors:** a role that is still
+  current reads `Present` with no end date, while an ended role carries its real
+  end date and flagging that is not a finding; no phone number; deliberately plain
+  ATS-safe layout; telegraphic CV with no first person; no invented metrics. Do not
+  demand numbers that do not exist.
 - **Keep personal data out.** Never surface salary, colleague names, internal
   hostnames, or protected characteristics.
 - **Stay in the technical lane.** Voice, length, ordering and formatting belong to

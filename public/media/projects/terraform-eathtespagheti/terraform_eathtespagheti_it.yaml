@@ -1,0 +1,85 @@
+title: "Infrastructure as Code con OpenTofu"
+role: "Autore / Operatore"
+year: "2026 — presente"
+tagline: "Tre stack OpenTofu che gestiscono la mia fondazione AWS, i repository GitLab/GitHub che le stanno accanto e la mia zone Cloudflare — con remote state su S3, lock nativo e credenziali che non stanno mai in un file."
+shareable: true
+
+platforms: [AWS, Cloudflare, GitLab, GitHub]
+stack: [OpenTofu, Provider AWS, Provider GitLab, Provider GitHub, Provider Cloudflare, Remote state S3, SOPS + age, glab]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      I miei repository vivevano su due forge contemporaneamente. GitLab è dove succede il lavoro; GitHub è dove guardano gli altri. Tenere allineati i due lati significava cliccare in due interfacce web per ogni repository, e la deriva si vedeva: descrizioni diverse, topic presenti solo da un lato, mirror che avevano smesso, repository esistenti su un solo lato.
+
+      Così ho sostituito i clic con OpenTofu. È nato come Terraform nel 2023 ed è stato migrato a OpenTofu a ottobre 2026. Tre stack descrivono ora l'infrastruttura: la fondazione AWS, il parco dei forge e la zone Cloudflare davanti a tutto. Gli stack leggono gli output l'uno dell'altro tramite `terraform_remote_state`, e un workspace `shared` pubblica i valori — nome del progetto, dominio, tag di default, mappa degli ambienti — che gli altri due consumano.
+
+  - type: divider
+
+  - type: text
+    title: "I tre stack"
+    body: |
+      - **`00_shared`** crea il bucket S3 versionato che contiene ogni file di state, poi pubblica i valori condivisi. Lo state vive in `terraform-eathtespagheti` in `eu-north-1`, una chiave per stack.
+      - **`01_gitsync`** gestisce i progetti GitLab e le relative controparti GitHub da un'unica mappa `managed_projects` — oggi 71 voci, 24 mantenute e le altre archiviate — più la branch protection e il push mirror di ogni progetto.
+      - **`02_cloudflare`** possiede la zone `eathtespagheti.eu`: record DNS e le Cache Rules che tengono su il sito CV quando l'origine non risponde.
+
+      Il locking è nativo su S3 (`use_lockfile`, che richiede OpenTofu 1.10 o successivo), quindi non c'è una tabella di lock DynamoDB da mantenere accanto al bucket. Gli ambienti sono workspace OpenTofu; il workspace `default` è volutamente inutilizzato e non configurato, così un `workspace select` dimenticato fallisce invece di applicare da qualche altra parte.
+
+  - type: divider
+
+  - type: text
+    title: "Segreti senza un file di segreti su disco"
+    body: |
+      Ogni credenziale raggiunge OpenTofu tramite l'ambiente, mai tramite un `tfvars` committato o un file in `~/.terraform.d`. `secrets/secrets.yaml` è cifrato con SOPS verso un recipient age, e `sops exec-env` lo trasforma in `TF_VAR_*` per la durata di un singolo comando.
+
+      I due forge hanno richiesto risposte diverse, perché i loro token si comportano diversamente. Il token GitHub è di lunga durata e sta nel file cifrato. Quello GitLab no: gitlab.com non permette più di creare un personal access token classico tramite la sua API, e il token OAuth di glab scade in circa 75 minuti — troppo poco per conservarlo — quindi il token GitLab viene letto da `glab` al momento dell'apply e non viene mai scritto da nessuna parte.
+
+      Resta un'avvertenza onesta. L'URL di un push mirror incorpora il token GitHub, e l'API GitLab non restituisce mai un URL con le credenziali, quindi il provider non può rileggerlo. Il token finisce perciò nello state. Il bucket dello state è privato e versionato e lo tratto come sensibile su questa base, invece di fingere che la credenziale resti fuori.
+
+      Un hook pre-commit blocca ogni commit che aggiungerebbe un file non cifrato corrispondente a una regola in `.sops.yaml`, così la regola è imposta invece che ricordata.
+
+  - type: divider
+
+  - type: text
+    title: "Una mappa, settantuno repository"
+    body: |
+      `managed_projects` è un'unica mappa in `01_gitsync/variables.tf`. Ogni chiave è un repository; ogni valore porta nome, descrizione, visibilità, topic, flag archived e branch di default. Un `for_each` la rende in tre modi: un `gitlab_project`, un `github_repository` e un `gitlab_project_push_mirror` tra i due.
+
+      Adottare il parco esistente è stata la parte difficile, non crearlo. Un blocco `import` (o `import.sh` per il caso incapsulato, che importa anche la branch protection quando il branch di default è già protetto) porta il progetto reale nello state; l'apply poi riconcilia intorno a esso invece di fallire perché la risorsa esiste. In un solo passaggio ho adottato l'intero parco esistente e archiviato la parte che non mantengo più — su entrambi gli host, dalla stessa mappa.
+
+      Le differenze tra i due forge sono gestite esplicitamente, non nascoste. GitHub rifiuta nelle descrizioni i caratteri di controllo che GitLab accetta, quindi le sequenze di spazi vengono collassate. I topic di GitHub sono minuscoli, `[a-z0-9-]` e al massimo 50 caratteri, mentre quelli di GitLab sono liberi, quindi i topic vengono normalizzati per GitHub lasciando GitLab canonico. Le impostazioni solo-GitHub — issue, wiki, progetti, download, homepage — sono in `ignore_changes`, così una configurazione che non le menziona non può spegnerle in silenzio.
+
+      La policy dei mirror è deliberata: `keep_divergent_refs = true`, quindi un ref divergente non viene mai sovrascritto con un force-push. GitLab è canonico, e un mirror è una pubblicazione, non un merge.
+
+  - type: divider
+
+  - type: text
+    title: "Cloudflare: DNS che non può andare alla deriva, cache che sopravvive a un outage"
+    body: |
+      La zone esisteva già, quindi lo stack la importa per ID e poi possiede i record. Sono divisi per chi possiede il loro contenuto: `cloudflare_dns_record.this` per tutto ciò che OpenTofu crea e mantiene, e `cloudflare_dns_record.ddns` per i record il cui contenuto è l'indirizzo WAN di casa, che un'app Cloudflare DDNS nel cluster aggiorna. OpenTofu possiede esistenza, tipo, TTL e stato proxy di quei record ma ignora `content`, così un cambio di WAN già applicato dall'app DDNS non viene annullato all'apply successivo.
+
+      Tre nomi di control plane sono record A diretti e non CNAME verso l'apex, di proposito. Il router di un sito remoto risolve il target di un CNAME attraverso la propria vista split del DNS locale e ottiene un indirizzo LAN irraggiungibile quando il tunnel è giù; un record A diretto risponde con l'indirizzo WAN da qualsiasi resolver, così Headscale e Tailscale possono rifare il bootstrap.
+
+      Le cache rule esistono per tenere su il sito CV statico quando l'origine non lo è. Tre regole mutuamente esclusive partizionano l'host — gli asset di Astro con hash nel nome sotto `/_astro/` per un anno, gli altri file statici per una settimana, l'HTML per una settimana all'edge con TTL browser di un minuto — così l'ordine di valutazione non può cambiare l'esito. Un secondo ruleset aggiunge `stale_if_error` per un'ulteriore settimana, perché il provider accetta quella direttiva solo con l'azione `set_cache_control` in una fase diversa. La freschezza non è compito del TTL: un CronJob di purge nel cluster gira dopo ogni rollout del CV, quindi il TTL deve solo essere abbastanza lungo perché un purge mancato si noti prima che faccia danni.
+
+  - type: divider
+
+  - type: text
+    title: "Cosa registrano le note operative"
+    body: |
+      Il README conserva i modi in cui ho davvero sbattuto la testa, perché ognuno è una trappola per l'apply successivo:
+
+      - L'URL con credenziali di un push mirror non è rileggibile, quindi ogni suo cambiamento forza una sostituzione, che OpenTofu esegue come destroy-then-create. Un errore altrove nello stesso apply può quindi lasciare il mirroring fermo — per questo la risorsa del mirror viene applicata da sola per prima, poi tutto il resto.
+      - Un push mirror appena creato non pusha da solo. `update_status` resta `none` e il repository GitHub resta vuoto finché l'update non viene forzato; `sync-mirror.sh` lo fa e riporta lo stato.
+      - Un record DNS cancellato dalla dashboard Cloudflare lascia dietro un `record_id` morto, e il plan successivo muore tentando di importare un record che non esiste più — lasciando un `.tflock` nel bucket che blocca l'esecuzione seguente. Togliere l'ID morto è la soluzione, e le note includono i comandi `aws s3api` per liberare il lock.
+      - Cloudflare rifiuta un CNAME su un nome che ha già un record A o AAAA, quindi cambiare il tipo di un record significa prima cancellare quello vecchio.
+      - Una branch protection è protetta da due push rule (maintainer del progetto e una deploy key di Flux), e gli attributi scalari deprecati del provider non possono rappresentarlo, quindi il plan segnala sempre un cambiamento. È rumore cosmetico, non deriva, e le note lo dicono.
+
+  - type: divider
+
+  - type: text
+    title: "Perimetro"
+    body: |
+      Questo gestisce il mio account AWS, i miei due forge e il mio dominio — un'infrastruttura personale, non un pattern da copiare in blocco. Non è deliberatamente un modulo: la mappa `managed_projects` è l'interfaccia, e i valori al suo interno sono fatti sui miei repository. Il repository è privato, quindi questa pagina è la descrizione pubblica; la case study dell'homelab descrive il cluster in cui girano i job DDNS e di purge.

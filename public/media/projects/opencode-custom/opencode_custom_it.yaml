@@ -1,0 +1,76 @@
+title: "Plugin di tooling agentico per OpenCode"
+role: "Autore / Maintainer"
+year: "2026 — presente"
+tagline: "Un plugin installabile che porta con sé il mio setup di coding agentico su ogni macchina: tre skill, due comandi, un subagent per la documentazione, una modalità unattended per sessione con badge nella TUI e un perimetro di modifica per repository."
+shareable: true
+
+platforms: [CLI, Node.js]
+stack: [JavaScript (ESM), API dei plugin OpenCode, SolidJS, OpenTUI, Babel, Node.js, Python 3]
+
+blocks:
+
+  - type: text
+    title: "Panoramica"
+    body: |
+      Uso uno strumento di coding agentico come driver quotidiano, e lo avevo personalizzato come fanno quasi tutti: skill, subagent e comandi slash copiati in `~/.config`, poi modificati sul posto. Funziona finché non usi una seconda macchina. A quel punto le due copie divergono, a una manca la correzione fatta la settimana scorsa, e non esiste una versione a cui tornare.
+
+      Così ho impacchettato l'intero setup come plugin. È un normale pacchetto stile npm installato direttamente da git — `opencode plugin add git+https://gitlab.com/eathtespagheti/opencode-custom.git` — il che significa che ogni macchina gira lo stesso commit, che un tag o un hash di commit fissa una versione, e che `plugin update` è tutta la procedura di aggiornamento.
+
+      Tutto ciò che contiene è mio e scritto per questo scopo: le skill, i comandi, il subagent, la macchina a stati delle sessioni e la parte TUI. È GPL-3.0 e pubblico, e non contiene segreti — server MCP, chiavi API e configurazione dei modelli restano nella configurazione locale di ogni macchina e non entrano mai nel pacchetto.
+
+  - type: divider
+
+  - type: text
+    title: "Cosa registra il plugin"
+    body: |
+      Il `setup(ctx)` del plugin gira una volta al caricamento e usa l'API dei plugin OpenCode V2. Nulla viene copiato nella directory di configurazione dell'utente; il plugin registra il proprio contenuto a runtime:
+
+      - **Skill** — `unattended`, `gitlab-issue-board` e `docs-sync`, lette da `skills/` e registrate tramite la skill transform.
+      - **Comandi** — `/unattended` e `/unattended-off`, registrati tramite la command transform.
+      - **Un subagent** — `docs-keeper`, registrato tramite la agent transform, con prompt e perimetro di permessi costruiti al caricamento per ogni progetto.
+      - **Comportamento di sessione** — hook su prompt e context che reiniettano il contratto unattended, più sottoscrizioni agli eventi e storage per sessione.
+      - **Un contratto RPC** — il namespace `unattended` con un metodo `status` e un evento `changed`, condiviso dalle due metà attraverso un unico modulo.
+      - **Un badge nella TUI** — l'entry `./tui` legge l'RPC e occupa uno slot della sidebar, così lo stato della sessione è visibile senza doverlo chiedere.
+
+      Il packaging è volutamente noioso: ESM puro, nessuna dipendenza a runtime, la stessa forma usata dall'ecosistema di plugin a monte. La metà TUI importa `@opencode/plugin/tui`, `solid-js` e `@opentui/solid`, tutti forniti dall'applicazione host; le uniche dipendenze sono i pacchetti Babel usati in fase di build.
+
+  - type: divider
+
+  - type: text
+    title: "Modalità unattended: un contratto che sopravvive alla compattazione"
+    body: |
+      Mandare una sessione avanti tutta la notte non è questione di dire all'agente di continuare; una sessione lunga viene compattata, va in pausa e dimentica perché non stava facendo domande. La modalità unattended è quindi un record per sessione e non un flag di progetto. Il plugin possiede quel record, reinietta il contratto dopo la compattazione e le pause di inattività, e scrive ogni decisione autonoma in un log — così la revisione del mattino dopo è un file, non una ricostruzione dallo scrollback.
+
+      `/unattended-off` è un handover sul posto, non uno stop: il task continua a girare, la sessione ricomincia a fare domande, e ricevi un digest delle decisioni prese mentre non c'eri. Un vecchio flag di progetto del design precedente non arma deliberatamente nessuno, così un file rimasto lì non può accendere la modalità in silenzio.
+
+      Il badge nella TUI è una piccola macchina a stati con una regola che vale la pena dichiarare: *sconosciuto non è spento*. Mostra `● unattended` in ambra mentre una sessione è armata, `○ unattended` in dim quando non lo è, e nulla quando lo stato non è leggibile — perché dichiarare "spento" mentre la modalità sta girando sarebbe peggio che non mostrare niente.
+
+  - type: divider
+
+  - type: text
+    title: "Manutenzione della documentazione con un perimetro per le modifiche"
+    body: |
+      Il subagent `docs-keeper` tiene la documentazione di un repository veritiera rispetto al codice che la genera, e `docs-sync` è la procedura che segue. La parte interessante non è l'agente, è il perimetro: un agente generico con permessi di modifica è un rischio, quindi ogni progetto fornisce un `.opencode/docs-sync.json` che il plugin trasforma sia nel prompt dell'agente sia nelle sue regole di permesso.
+
+      Quel file dichiara la fonte di verità, i glob dei documenti che l'agente può modificare, i glob in sola lettura negati di nuovo dopo la allow list, una tabella markdown che mappa i tipi di cambiamento alle superfici documentali da aggiornare, lo stile di prosa della casa e cosa deve scansionare il checker. Senza alcuna configurazione il plugin registra comunque l'agente, ma in sola lettura — zero regole di modifica, con solo `git status/diff/log/show` e il checker consentiti — che è un punto di partenza sicuro più che sbagliato.
+
+      Due regole preservano la versione propria di un progetto: una `docs-keeper.md` o una directory `docs-sync/` a livello di progetto vincono sempre sulla copia del plugin, e prompt e perimetro sono costruiti per posizione del progetto, così due progetti serviti da un unico processo in esecuzione hanno ciascuno i propri.
+
+      Il checker è un piccolo script bash con un assist in Python: segnala i link markdown che non portano da nessuna parte e i percorsi tra backtick che non risolvono — i due controlli che valgono in qualsiasi repository, indipendentemente da linguaggio o build system. Richiede bash, git e python3 e nulla più.
+
+  - type: divider
+
+  - type: text
+    title: "Testare un plugin senza un editor aperto"
+    body: |
+      La suite di test guida il plugin reale contro un contesto OpenCode V2 mock, così la registrazione si può verificare senza TUI live e senza modello: che skill e comandi arrivino, che gli hook scattino, che l'RPC risponda, che lo stato per sessione non tracimi tra sessioni, e che l'handover di spegnimento faccia quello che promette. Una seconda suite copre il checker della documentazione e la forma delle definizioni di agente e skill.
+
+      Un dettaglio di packaging vale la pena di essere registrato perché è invisibile finché non si rompe: l'entry TUI è compilata da JSX e il `tui.js` compilato è committato. OpenCode applica la sua transform JSX per Solid solo ai file fuori da `node_modules`, quindi un pacchetto installato deve distribuire JavaScript già compilato — modificare il sorgente senza ricompilare non cambia nulla per chi lo ha installato. Lo script di build e l'output committato fanno parte del pacchetto per questo motivo.
+
+links:
+  - label: Sorgente (GitLab)
+    url: https://gitlab.com/eathtespagheti/opencode-custom
+    type: repo
+  - label: Sorgente (GitHub)
+    url: https://github.com/eathtespagheti/opencode-custom
+    type: repo

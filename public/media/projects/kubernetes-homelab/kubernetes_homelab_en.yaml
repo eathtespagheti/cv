@@ -1,11 +1,11 @@
 title: "Advanced Kubernetes Homelab & Cross-Site Infrastructure"
 role: "Architect / Operator"
 year: "2019 — present"
-tagline: "A single-node Kubernetes cluster running at home, with eBPF networking, GitOps and centralised identity."
+tagline: "A single-node Kubernetes cluster running a personal cloud at home — 21 applications, eBPF networking, GitOps delivery and centralised identity."
 shareable: true
 
 platforms: [Kubernetes, Linux, Self-hosted]
-stack: [kubeadm, Cilium, eBPF, Flux Operator, SOPS, age, Keycloak, OIDC, cert-manager, Headscale, Gateway API, CloudNativePG, k8s-gateway, Prometheus, Grafana, Hubble]
+stack: [kubeadm, Cilium, eBPF, Flux Operator, SOPS, age, Keycloak, keycloak-config-cli, OIDC, cert-manager, Headscale, Gateway API, CloudNativePG, k8s-gateway, GitLab Runner, kube-prometheus-stack, Grafana, Stalwart, Hubble]
 
 blocks:
 
@@ -16,7 +16,7 @@ blocks:
 
       It began as a single Docker host and was migrated to a kubeadm-managed Kubernetes cluster. Everything is declarative: the repository is the single source of truth, Flux continuously reconciles it, and every secret is encrypted at rest with SOPS and age before it ever reaches Git. There is no imperative `kubectl apply` in day-to-day operation — a change is a commit, and the cluster converges.
 
-      The cluster is a genuine reference implementation rather than a toy. It runs a full personal cloud — photos, media, a password manager, home automation and EV telemetry — all under a single domain, with centralised identity and a deliberately minimal public attack surface.
+      The cluster is a genuine reference implementation rather than a toy. Twenty-one applications run on it — photos, media, a password manager, home automation, EV telemetry, file sync, tasks, the CV and LLM workspaces — on top of sixteen platform components, all under a single domain, with centralised identity and a deliberately minimal public attack surface.
 
   - type: divider
 
@@ -42,9 +42,9 @@ blocks:
   - type: text
     title: "Operating the cluster"
     body: |
-      Day-to-day the cluster is managed through **Headlamp**, a Kubernetes dashboard sitting behind the same Keycloak SSO, so routine visibility does not require handing out kubeconfigs.
+      Day-to-day the cluster is managed through **Headlamp**, a Kubernetes dashboard sitting behind the same Keycloak SSO, so routine visibility does not require handing out kubeconfigs. The **Flux web UI** is exposed the same way, and `kubectl` authenticates through Keycloak too: the API server is configured at bootstrap to trust Keycloak as an OIDC provider, mapping the `groups` claim straight onto RBAC.
 
-      At the time of writing it runs 90 Pods, 66 Deployments, 5 StatefulSets and 15 Jobs across the platform and application namespaces — all reporting healthy.
+      Twenty-one applications and sixteen platform components run on one node, with nine CloudNativePG Postgres clusters behind them. The screenshots below are a snapshot of the workload summary.
 
   - type: image
     src: /media/projects/kubernetes-homelab/headlamp-map.png
@@ -131,6 +131,15 @@ blocks:
   - type: divider
 
   - type: text
+    title: "The cluster also builds the projects"
+    body: |
+      A **GitLab Runner** with the Kubernetes executor runs the CI for these projects from inside the cluster it deploys to. The runner polls GitLab over an outbound connection only, so it adds no ingress, DNS record or TLS certificate to the public surface at all.
+
+      The privilege model is the interesting part. Job pods carry **no cluster RBAC**, and the build container runs rootless BuildKit rather than a privileged Docker daemon — with seccomp relaxed and privilege escalation left at the Kubernetes default, which is the narrowest configuration rootless BuildKit will run under. Deploy jobs receive their own project-scoped kubeconfig through masked, protected CI variables, and choose between two ServiceAccounts: a read-only deployer holding the built-in `view` role, and a reconciler that may only `get`/`list`/`watch`/`patch` `gitrepositories` and `kustomizations` in `flux-system` — enough for a pipeline to force a reconcile, and nothing else. An in-cluster **Stalwart** SMTP relay gives the applications outbound mail without a third-party provider.
+
+  - type: divider
+
+  - type: text
     title: "Data and DNS"
     body: |
       Stateful workloads run on **CloudNativePG**, which manages PostgreSQL with streaming replication and pod-level failover (a single-node homelab, so not a node-failure guarantee) rather than hand-rolled backup scripts. Persistent data follows a tiered storage model: PVCs for application data, `local` volumes for what used to be host paths, and host storage only for interfaces and scratch.
@@ -148,7 +157,9 @@ blocks:
   - type: text
     title: "Observability"
     body: |
-      The full **Prometheus + Grafana + Alertmanager** stack runs in-cluster, with Grafana behind OIDC and its admin role mapped from a Keycloak group. A **Gatus** status page auto-discovers Ingress objects and checks every service's health without manual configuration, and **Cilium Hubble** gives L3/L4/L7 flow visibility when the datapath is what is misbehaving.
+      The full **kube-prometheus-stack** runs in-cluster: Prometheus with 30 days of retention on a local volume, Alertmanager, and Grafana behind OIDC with its admin role mapped from a Keycloak group. Dashboards and recording rules are **provisioned from ConfigMaps and a `PrometheusRule`** rather than drawn by hand, so they survive a Grafana restart and a cluster rebuilt from scratch, and a blackbox exporter probes Grafana's edge URL from outside.
+
+      Prometheus and Alertmanager are exposed on **dedicated, LAN/VPN-only ingresses with no auth gate** in front of them. That is deliberate rather than an oversight: they are off the public path entirely, not merely password-protected. **Cilium Hubble** gives L3/L4/L7 flow visibility when the datapath is what is misbehaving.
 
   - type: divider
 
@@ -165,8 +176,8 @@ blocks:
     title: "Roadmap"
     body: |
       - Expanding to a **highly available multi-node cluster across three geographic sites** (two on-premises, one cloud)
-      - An automated **disaster-recovery and backup strategy** for stateful workloads
-      - Moving more workloads onto the **NVIDIA GPU** already exposed through the device plugin, for local LLM serving and media transcoding
+      - **Backup and disaster recovery for every stateful workload**: Nextcloud already writes nightly Postgres dumps to its own volume, but the other eight CNPG clusters do not, and node-local storage makes a disk failure a cluster-wide failure
+      - Moving more workloads onto the **NVIDIA GPU** already exposed through the device plugin, for local LLM inference and media transcoding
 
 links:
   - label: Architecture

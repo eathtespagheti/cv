@@ -3,13 +3,14 @@ title: Platform Engineer
 photo: /media/profile.jpg
 
 summary: >
-  Platform engineer with 8+ years in software, the last 5 on AWS, most recently
+  Platform engineer with 9+ years in software, the last 5 on AWS, most recently
   operating ~24 services on a Kubernetes (EKS) platform in a four-engineer
   platform team, appointed to research and first-implement its release,
   image-pipeline, deployment and GitOps standards, with infrastructure as code
-  (Terraform), Flux CD GitOps, CI/CD and observability, and ownership of release
-  engineering and company-wide system administration, with cloud cost
-  optimisation on a previous agency estate.
+  (Terraform, OpenTofu), Flux CD GitOps, CI/CD and observability, and ownership
+  of release engineering and company-wide system administration, with cloud cost
+  optimisation on a previous agency estate. Currently between roles and open to
+  platform engineering work.
 
 location: Alghero, Italy (Remote)
 timezone: Europe/Rome
@@ -64,6 +65,7 @@ skills:
       - Bitbucket Pipelines
       - Canary deployments
       - GitLab CI/CD
+      - GitLab Runner (Kubernetes executor)
       - Jenkins
       - GitHub Actions
       - Bitbucket Pipelines Runners Autoscaler
@@ -80,6 +82,7 @@ skills:
   - group: Infrastructure as Code, Secrets & Identity
     items:
       - Terraform
+      - OpenTofu
       - Reusable Terraform modules
       - Ansible
       - Infisical
@@ -99,7 +102,7 @@ skills:
       - Prometheus
       - Grafana (dashboard authoring, provisioning)
       - APM
-      - Redis (AWS ElastiCache)
+      - Redis (AWS ElastiCache) / Valkey
       - PostgreSQL
       - MongoDB
       - CloudNativePG
@@ -108,12 +111,12 @@ skills:
   - group: Networking & Edge
     items:
       - AWS VPC (subnets, routing, peering, Transit Gateway)
-      - Cloudflare CDN / anti-DDoS
+      - Cloudflare (CDN / anti-DDoS, DNS, cache rules)
       - CloudFront
       - Tailscale
       - Split-horizon DNS
 
-  - group: Programming & Scripting
+  - group: Programming, Scripting & AI Tooling
     items:
       - Bash / POSIX shell
       - jq
@@ -123,11 +126,14 @@ skills:
       - SQL
       - Git
       - GitLab & GitHub REST APIs (gh, glab)
+      - MCP servers and gateways
+      - Self-hosted LLM serving (Open WebUI, Ollama)
+      - Agentic coding tooling (OpenCode plugins, skills, subagents)
 
 experience:
   - company: BizAway
     role: Platform Engineer
-    period: Jul 2024 — present
+    period: Jul 2024 — Oct 2026
     description:
       - "Led the design and first implementation of a shared Bitbucket Pipelines
         release step, then rolled it out across ~24 services in three
@@ -314,8 +320,8 @@ projects_intro: >
 
 projects:
   - name: Advanced Kubernetes Homelab
-    description: Single-node kubeadm cluster (Cilium eBPF, Flux GitOps, SOPS,
-      Keycloak OIDC).
+    description: Single-node kubeadm cluster running 21 apps (Cilium eBPF, Flux
+      GitOps + image automation, Keycloak OIDC, CloudNativePG).
     url: https://cv.eathtespagheti.eu/projects/kubernetes-homelab
   - name: Self-Hosted LLM & Agentic Coding Workspace
     description: GitOps-run LLM platform (Open WebUI, MetaMCP gateway, OmniRoute AI
@@ -325,10 +331,6 @@ projects:
     description: YAML-driven CV site, PDF/DOCX/TXT export and cover-letter
       generator, containerised and shipped via GitLab CI.
     url: https://cv.eathtespagheti.eu/projects/cv-platform
-  - name: octopus-prices
-    description: Helm-packaged Kubernetes tariff tracker and Telegram bot; hourly
-      CronJob, ConfigMaps as the only datastore, GitLab CI OCI release.
-    url: https://cv.eathtespagheti.eu/projects/octopus-prices
   - name: AWS Services Scheduler
     description: Open-source Terraform module (built as a personal project, later
       adopted at Abika) that powers ECS services and RDS instances on and off with
@@ -338,6 +340,11 @@ projects:
     description: Italy-only TeslaMate fuel-price importer and provisioned Grafana
       dashboards for EV fuel savings and ROI, over PostgreSQL.
     url: https://cv.eathtespagheti.eu/projects/teslamate-fuel-roi
+  - name: OpenTofu Infrastructure as Code
+    description: OpenTofu stacks managing the personal AWS foundation, a
+      GitLab/GitHub repository fleet and the Cloudflare zone, with S3 remote
+      state and credentials kept out of files.
+    url: https://cv.eathtespagheti.eu/projects/terraform-eathtespagheti
 
 education:
   - institution: Politecnico di Torino

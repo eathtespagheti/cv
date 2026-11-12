@@ -100,8 +100,9 @@ Rules:
 
 ## 7. Repo guardrails (this repository, mandatory)
 
-- **The most recent position has no end date.** It is a deliberate rule about the
-  latest role, whichever role that is. Do not add an end date.
+- **A position you still hold has no end date.** The latest role reads
+  `<start> - Present` while it is current, whichever role that is. A role that has
+  ended carries its real end date — never leave `Present` on a job that is over.
 - **Keep personal data out.** No salary, colleague names, specific
   vulnerability details against named employer systems, internal hostnames, or
   phone number. Email only. The repository is public.
@@ -120,7 +121,8 @@ Rules:
 - [ ] Is every technology mentioned supported by evidence elsewhere?
 - [ ] Is the tense correct per role?
 - [ ] Are the skills grouped and ordered by relevance to the target role?
-- [ ] Is the most recent role free of an end date?
+- [ ] Does a current role end in `Present`, and does every ended role carry its real
+  end date?
 - [ ] Does anything contradict `applicant.yaml` or the project list?
 - [ ] Are the CV and the project card descriptions free of first person?
 - [ ] Does any personal data (salary, names, internal hosts, vuln details) appear?

@@ -105,8 +105,9 @@ Flagging this limit is part of doing the job honestly.
 
 ## 8. Repo guardrails (this repository, mandatory)
 
-- **Known deliberate conventions — do not report as errors:** the most recent role
-  reads `Present` with no end date; there is no phone number (email only); the
+- **Known deliberate conventions — do not report as errors:** a role that is still
+  current reads `Present` with no end date, while an ended role carries its real
+  end date; there is no phone number (email only); the
   layout is deliberately plain/ATS-safe; the CV is telegraphic and uses no first
   person, while the cover letter deliberately uses "I".
 - **Keep personal data out.** Never ask for salary, phone, or colleague names,

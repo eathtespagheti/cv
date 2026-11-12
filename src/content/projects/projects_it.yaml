@@ -5,46 +5,49 @@ projects:
     role: Architetto / Operatore
     year: "2019 — presente"
     description: >
-      Un homelab single-node costruito su kubeadm, evoluto da un
-      host Docker legacy. Completamente dichiarativo e gestito in GitOps con
-      Flux; tutti i segreti cifrati a riposo con SOPS e age. Cilium fornisce
+      Un homelab single-node costruito su kubeadm, evoluto da un host Docker
+      legacy e oggi sede di 21 applicazioni su 16 componenti di piattaforma.
+      Completamente dichiarativo e gestito in GitOps con Flux, dal Flux Operator
+      all'image automation che committa su Git i nuovi tag. Cilium fornisce
       networking basato su eBPF come completa sostituzione di kube-proxy, con
-      annunci L2, ingress controller L7 e routing Gateway API. DNS split-horizon
-      tramite k8s-gateway con upstream Quad9 DoT e Cloudflare DDNS per
-      l'accesso esterno. IAM centralizzato tramite Keycloak con OIDC, federazione
-      Google IdP e RBAC personalizzato su servizi self-hosted, oltre a un control
-      plane Headscale self-hosted per tunnel cross-site con relay DERP integrati.
-      Un unico ingress forwardato è l'unico punto d'ingresso pubblico; ogni altro
-      servizio è solo LAN/VPN. I certificati sono emessi automaticamente da
-      cert-manager, e Prometheus/Grafana forniscono il monitoraggio in-cluster.
+      LB-IPAM, annunci L2, routing Gateway API e Hubble; DNS split-horizon
+      tramite k8s-gateway e Cloudflare DDNS mantengono un unico ingress
+      forwardato come solo punto d'ingresso pubblico. Keycloak è l'IdP centrale -
+      federazione Google IdP, RBAC mappato sui gruppi e realm dichiarati tramite
+      keycloak-config-cli - con OIDC sulle app e oauth2-proxy dove manca.
+      CloudNativePG gestisce nove cluster Postgres, kube-prometheus-stack con
+      dashboard provisionate, recording rule e sonde blackbox copre il
+      monitoraggio, un GitLab Runner self-hosted con executor Kubernetes
+      costruisce i progetti, e Headscale fornisce i tunnel cross-site.
     category: Infrastruttura
     theme: blue
     featured: true
     platforms: [Kubernetes, Linux, Self-hosted]
-    tags: [kubernetes, cilium, ebpf, gitops, flux, sops, keycloak, oidc, cert-manager, headscale, gateway-api, prometheus, hubble, homelab]
+    tags: [kubernetes, cilium, ebpf, gitops, flux, sops, keycloak, oidc, cnpg, gitlab-runner, cert-manager, headscale, gateway-api, prometheus, grafana, hubble, homelab]
     metrics:
-      - label: Orchestratore
-        value: kubeadm (single node)
+      - label: Workload
+        value: 21 app, 16 componenti di piattaforma
       - label: Networking
-        value: Cilium eBPF
+        value: Cilium eBPF + Gateway API
       - label: Superficie pubblica
         value: Un ingress forwardato
       - label: Identità
         value: Keycloak OIDC / RBAC
-      - label: Segreti
-        value: SOPS + age
+      - label: Dati
+        value: 9 cluster CloudNativePG
     stack:
       - Kubernetes (kubeadm)
       - Cilium eBPF
       - Flux Operator + Flux CD
       - SOPS + age
       - cert-manager / Let's Encrypt
-      - Keycloak
-      - Headscale / Tailscale
+      - Keycloak + keycloak-config-cli
+      - Headscale / Headplane
       - Gateway API
       - CloudNativePG (PostgreSQL)
       - k8s-gateway
-      - Prometheus / Grafana
+      - kube-prometheus-stack
+      - GitLab Runner (executor Kubernetes)
       - Hubble
       - Cloudflare DDNS
       - Quad9 DoT
@@ -696,4 +699,130 @@ projects:
         type: repo
       - label: Sorgente (GitHub)
         url: https://github.com/eathtespagheti/teslamate-fuel-roi
+        type: repo
+
+  - slug: gitlab-mirroring
+    order: 18
+    name: GitLab ⇄ GitHub Mirror
+    role: Autore / Operatore
+    year: "2026 — presente"
+    description: >
+      Un singolo script POSIX shell che riconcilia un account GitLab e uno GitHub
+      personali e li mantiene specchiati sul piano gratuito. Verifica entrambi i
+      lati per repository mancanti dall'altro, push mirror mancanti, disabilitati
+      o duplicati, discrepanze di visibilità, repository vuoti e storie
+      divergenti; crea il repository mancante sull'altro lato e configura un push
+      mirror GitLab-to-GitHub lato server; ed esegue una rete di sicurezza
+      pianificata GitHub-to-GitLab che fa il fast-forward dei commit pushati
+      direttamente su GitHub. GitLab resta canonico, e ogni percorso di
+      riconciliazione crea o fa avanzare un ref - nulla viene eliminato e nessun
+      push force-mirror viene usato.
+    category: Tooling per sviluppatori
+    theme: emerald
+    platforms: [CLI, Linux]
+    tags: [shell, posix, git, gitlab, github, api, mirroring, systemd, automation, cli]
+    metrics:
+      - label: Linguaggio
+        value: POSIX sh (~1.000 righe)
+      - label: Direzione
+        value: Push mirror GitLab → GitHub
+      - label: Rete di sicurezza
+        value: GitHub → GitLab (timer systemd)
+      - label: Dipendenze a runtime
+        value: git, gh, glab
+      - label: Test
+        value: Suite shell ermetica (CLI fake)
+    stack:
+      - POSIX shell
+      - GitLab REST API
+      - GitHub REST API (gh CLI)
+      - glab CLI
+      - Plumbing git (cache bare, refspec)
+      - systemd
+    links:
+      - label: Sorgente (GitLab)
+        url: https://gitlab.com/eathtespagheti/gitlab-mirroring
+        type: repo
+      - label: Sorgente (GitHub)
+        url: https://github.com/eathtespagheti/gitlab-mirroring
+        type: repo
+
+  - slug: terraform-eathtespagheti
+    order: 19
+    name: Infrastructure as Code con OpenTofu
+    role: Autore / Operatore
+    year: "2023 — presente"
+    description: >
+      Tre stack OpenTofu per una fondazione AWS personale e per i forge che le
+      stanno accanto: uno crea il bucket S3 versionato dello state e pubblica i
+      valori condivisi, uno gestisce i progetti GitLab e i relativi mirror
+      GitHub con push mirror lato server, e uno possiede la zone Cloudflare -
+      record DNS, Cache Rules e serving stale-if-error. Lo state è S3 nativo con
+      lock tramite lockfile, e nessuna credenziale sta in un file su disco: i
+      token GitHub e Cloudflare arrivano tramite sops exec-env, e il token GitLab
+      viene generato da glab al momento dell'apply.
+    category: Infrastruttura
+    theme: blue
+    platforms: [AWS, Cloudflare, GitLab, GitHub]
+    tags: [opentofu, terraform, aws, cloudflare, gitlab, github, sops, iac, remote-state, workspaces, dns]
+    metrics:
+      - label: Stack
+        value: 3 (shared, gitsync, cloudflare)
+      - label: Repository
+        value: 71 definiti, 24 mantenuti
+      - label: State
+        value: Remote state S3, lock tramite lockfile
+      - label: Segreti
+        value: SOPS + age, token generato da glab
+    stack:
+      - OpenTofu
+      - Provider AWS
+      - Provider GitLab
+      - Provider GitHub
+      - Provider Cloudflare
+      - Remote state S3
+      - SOPS + age
+      - glab
+
+  - slug: opencode-custom
+    order: 20
+    name: Plugin di tooling agentico per OpenCode
+    role: Autore / Maintainer
+    year: "2026 — presente"
+    description: >
+      Un plugin installabile che porta con sé un setup personale di coding
+      agentico su ogni macchina. Registra tre skill, due comandi slash e un
+      subagent per la manutenzione della documentazione tramite l'API dei plugin
+      OpenCode, arma una modalità unattended notturna per sessione con contratto
+      reiniettato, avviso di handover e badge nella sidebar della TUI, e costruisce
+      un perimetro di modifica per repository a partire dal file di configurazione
+      di ogni progetto. ESM puro senza dipendenze a runtime; l'entry TUI in
+      SolidJS è compilata e committata, e il pacchetto è testato contro un
+      contesto plugin mock.
+    category: Tooling per sviluppatori
+    theme: cyan
+    platforms: [CLI, Node.js]
+    tags: [opencode, plugin, agentic-coding, nodejs, esm, solidjs, tui, skills, subagents, gitlab]
+    metrics:
+      - label: Registra
+        value: 3 skill, 2 comandi, 1 subagent
+      - label: Dipendenze a runtime
+        value: Nessuna (ESM puro)
+      - label: Stato
+        value: Per sessione, per progetto
+      - label: Test
+        value: Contesto plugin mock
+    stack:
+      - JavaScript (ESM)
+      - API dei plugin OpenCode
+      - SolidJS / OpenTUI
+      - Babel (solo build)
+      - Node.js
+      - Python 3 (checker documentazione)
+    links:
+      - label: Sorgente (GitLab)
+        url: https://gitlab.com/eathtespagheti/opencode-custom
+        type: repo
+      - label: Sorgente (GitHub)
+        url: https://github.com/eathtespagheti/opencode-custom
         type: repo

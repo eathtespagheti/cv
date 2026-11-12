@@ -1,0 +1,76 @@
+title: "OpenCode Agentic Tooling Plugin"
+role: "Author / Maintainer"
+year: "2026 — present"
+tagline: "An installable plugin that carries my agentic-coding setup across machines: three skills, two commands, a docs-keeping subagent, a per-session unattended mode with a TUI badge, and a per-repository edit fence."
+shareable: true
+
+platforms: [CLI, Node.js]
+stack: [JavaScript (ESM), OpenCode plugin API, SolidJS, OpenTUI, Babel, Node.js, Python 3]
+
+blocks:
+
+  - type: text
+    title: "Overview"
+    body: |
+      I run an agentic coding tool as my daily driver, and I had customised it the way most people do: skills, subagents and slash commands copied into `~/.config`, then edited in place. That works until you use a second machine. Then the two copies drift, one of them is missing the fix you made last week, and there is no version to roll back to.
+
+      So I packaged the whole setup as a plugin. It is a normal npm-style package installed straight from git — `opencode plugin add git+https://gitlab.com/eathtespagheti/opencode-custom.git` — which means every machine runs the same commit, a tag or commit hash pins a version, and `plugin update` is the whole upgrade procedure.
+
+      Everything in it is mine and written for this purpose: the skills, the commands, the subagent, the session-state machinery and the TUI half. It is GPL-3.0 and public, and it contains no secrets — MCP servers, API keys and model configuration stay in each machine's local config and never enter the package.
+
+  - type: divider
+
+  - type: text
+    title: "What the plugin registers"
+    body: |
+      The plugin's `setup(ctx)` runs once at load and uses the OpenCode V2 plugin API. Nothing is copied into the user's config directory; the plugin registers its own content at runtime:
+
+      - **Skills** — `unattended`, `gitlab-issue-board` and `docs-sync`, read from `skills/` and registered through the skill transform.
+      - **Commands** — `/unattended` and `/unattended-off`, registered through the command transform.
+      - **A subagent** — `docs-keeper`, registered through the agent transform, with a per-project prompt and permission fence built at load time.
+      - **Session behaviour** — prompt and context hooks that re-inject the unattended contract, plus event subscriptions and per-session storage.
+      - **An RPC contract** — the `unattended` namespace with a `status` method and a `changed` event, shared by both halves through one module.
+      - **A TUI badge** — the `./tui` entrypoint reads the RPC and occupies a sidebar slot, so the session's state is visible without asking for it.
+
+      The packaging is deliberately boring: plain ESM, no runtime dependencies, the same shape the upstream plugin ecosystem uses. The TUI half imports `@opencode/plugin/tui`, `solid-js` and `@opentui/solid`, all supplied by the host application; the only dependencies are the Babel packages used at build time.
+
+  - type: divider
+
+  - type: text
+    title: "Unattended mode: a contract that survives compaction"
+    body: |
+      Running a session overnight is not a matter of telling the agent to keep going; a long run gets compacted, pauses, and forgets why it was not asking questions. Unattended mode is therefore a per-session record rather than a project-wide flag. The plugin owns that record, re-injects the contract after compaction and idle pauses, and writes every autonomous decision to a log — so the morning-after review is a file, not a reconstruction from scrollback.
+
+      `/unattended-off` is an in-place handover, not a stop: the task keeps running, the session starts asking questions again, and you get a digest of the decisions taken while you were not there. A legacy project-wide flag from the earlier design deliberately arms nobody, so an old file cannot silently turn the mode on.
+
+      The TUI badge is a small state machine with one rule worth stating: *unknown is not off*. It shows `● unattended` in amber while a session is armed, `○ unattended` in dim when it is not, and nothing at all when the state cannot be read — because claiming "off" while the mode is actually running would be worse than showing nothing.
+
+  - type: divider
+
+  - type: text
+    title: "Docs-keeping with a fence around the edits"
+    body: |
+      The `docs-keeper` subagent keeps a repository's documentation truthful against the code that generates it, and `docs-sync` is the procedure it follows. The interesting part is not the agent, it is the fence: a generic agent with edit rights is a liability, so each project supplies a `.opencode/docs-sync.json` that the plugin turns into both the agent's prompt and its permission rules.
+
+      That file names the source of truth, the doc globs the agent may edit, the read-only doc globs denied again after the allow list, a markdown table mapping change kinds to doc surfaces, the house prose style, and what the checker should scan. With no config at all the plugin still registers the agent, but read-only — zero edit rules, with only `git status/diff/log/show` and the checker allowed — which is a safe starting point rather than a wrong one.
+
+      Two rules keep a project's own version intact: a project-level `docs-keeper.md` or `docs-sync/` directory always wins over the plugin's copy, and the prompt and fence are built per project location, so two projects served by one running process get their own.
+
+      The checker itself is a small bash script with a Python assist: it reports markdown links that point nowhere and backticked paths that do not resolve — the two checks that hold in any repository, regardless of language or build system. It needs bash, git and python3 and nothing else.
+
+  - type: divider
+
+  - type: text
+    title: "Testing a plugin without a live editor"
+    body: |
+      The test suite drives the real plugin against a mock OpenCode V2 context, so registration can be asserted with no live TUI and no model: that the skills and commands land, that the hooks fire, that the RPC answers, that per-session state does not leak between sessions, and that the off handover does what it says. A second suite covers the docs checker and the shape of the agent and skill definitions.
+
+      One packaging detail is worth recording because it is invisible until it breaks: the TUI entry is compiled from JSX and the compiled `tui.js` is committed. OpenCode only applies its Solid JSX transform to files outside `node_modules`, so an installed package has to ship built JavaScript — editing the source without rebuilding changes nothing for anyone who installed it. The build script and the committed output are both part of the package for that reason.
+
+links:
+  - label: Source (GitLab)
+    url: https://gitlab.com/eathtespagheti/opencode-custom
+    type: repo
+  - label: Source (GitHub)
+    url: https://github.com/eathtespagheti/opencode-custom
+    type: repo

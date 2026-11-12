@@ -134,10 +134,11 @@ No file is written and nothing is edited. The review is a lens, not an artifact.
   never surface protected characteristics (age, sex, nationality, health, family
   status). If a risk is really a proxy for one, name the document signal, not the
   trait.
-- **Known deliberate conventions — do not report as errors:** the most recent role
-  reads `Present` with no end date; there is no phone number (email only); the
-  layout is deliberately plain/ATS-safe; the CV is telegraphic and uses no first
-  person, while the cover letter deliberately uses "I".
+- **Known deliberate conventions — do not report as errors:** a role that is still
+  current reads `Present` with no end date, while an ended role carries its real
+  end date; there is no phone number (email only); the layout is deliberately
+  plain/ATS-safe; the CV is telegraphic and uses no first person, while the cover
+  letter deliberately uses "I".
 - **Never fabricate** a posting requirement, a company fact, or a candidate claim
   to make a point. If evidence is missing, the finding is that it is missing.
 - **Read only; never write.** Do not edit files, commit, or push. The review lives

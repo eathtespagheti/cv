@@ -21,7 +21,7 @@ experience:
   bizaway:
     company: BizAway
     role: Platform Engineer
-    period: Jul 2024 — present
+    period: Jul 2024 — Oct 2026
     context: >
       a ~24-service platform on AWS across three applications
   abika:
@@ -51,30 +51,31 @@ experience:
 
 paragraphs:
   ci_cd: >
-    I own the delivery pipeline for a platform of about 24 microservices, running
-    at around 18 to 20 releases a day across three applications: Bitbucket
-    Pipelines with custom steps injected through dynamic
+    At BizAway I owned the delivery pipeline for a platform of about 24
+    microservices, running at around 18 to 20 releases a day across three
+    applications: Bitbucket Pipelines with custom steps injected through dynamic
     pipelines (Forge apps), including a shared release step that standardised
     releases across ~24 services, removed per-service release setup and
-    enabled canary deployments. I also maintain back-merge pipelines, a custom
+    enabled canary deployments. I also maintained back-merge pipelines, a custom
     merge check and a SonarQube quality gate.
 
   containers: >
-    I engineer the Docker image pipeline with BuildKit, including cache mounts,
-    multi-stage Dockerfiles. I publish
-    multi-architecture (ARM64) images to ECR and run a registry pull-through
+    At BizAway I engineered the Docker image pipeline with BuildKit, including
+    cache mounts and multi-stage Dockerfiles. I published
+    multi-architecture (ARM64) images to ECR and ran a registry pull-through
     cache that resolved a Docker Hub pull-rate-limit production incident, with
     lifecycle policies controlling image retention.
 
   kubernetes: >
-    I manage three AWS EKS clusters - QA, staging and production - and upgrade
-    all three on every Kubernetes minor release, one week apart starting from QA, rotating
-    node groups through surge capacity and PodDisruptionBudgets with add-on and CRD
-    validation, and no user-visible production outage to date. I maintain the
-    official EKS Cluster Upgrade Runbook for that critical, irreversible
-    control-plane procedure - covering AWS Upgrade Insights, deprecated-API
-    scanning with kubent and Pluto, and managed add-on compatibility validation. I
-    also work on the Helm charts and with the AWS load balancing (ELB/ALB).
+    At BizAway I managed three AWS EKS clusters - QA, staging and production -
+    and upgraded all three on every Kubernetes minor release, one week apart
+    starting from QA, rotating node groups through surge capacity and
+    PodDisruptionBudgets with add-on and CRD validation, and no user-visible
+    production outage. I maintained the official EKS Cluster Upgrade Runbook for
+    that critical, irreversible control-plane procedure - covering AWS Upgrade
+    Insights, deprecated-API scanning with kubent and Pluto, and managed add-on
+    compatibility validation. I also worked on the Helm charts and with the AWS
+    load balancing (ELB/ALB).
 
   gitops: >
     I drove the transition to a GitOps delivery model with Flux CD, migrating
@@ -83,21 +84,22 @@ paragraphs:
     repository.
 
   terraform: >
-    I manage infrastructure as code with Terraform, and I keep secrets as code:
-    Infisical as a Terraform secret source, SOPS encrypted with AWS KMS in the
-    GitOps repository, AWS Secrets Manager and SSM Parameter Store for runtime
-    secrets, and OIDC pipeline-to-AWS authorisation. I introduced a SOPS pre-commit
-    hook so secret hygiene is automatic, and I run OAuth2-proxy in front of
-    Keycloak OIDC to gate internal webapps. At BizAway the core infrastructure was
-    already established, so my work there is mostly extending and maintaining it,
-    with greenfield environment builds only where needed.
+    I work with infrastructure as code - Terraform and OpenTofu - and I keep
+    secrets as code: Infisical as a Terraform secret source, SOPS encrypted
+    with AWS KMS in the GitOps repository, AWS Secrets Manager and SSM Parameter
+    Store for runtime secrets, and OIDC pipeline-to-AWS authorisation. I
+    introduced a SOPS pre-commit hook so secret hygiene is automatic, and I run
+    OAuth2-proxy in front of Keycloak OIDC to gate internal webapps. At BizAway
+    the core infrastructure was already established, so my work there was mostly
+    extending and maintaining it, with greenfield environment builds only where
+    needed.
 
   security: >
     I was appointed System Administrator at BizAway, owning authentication and
     authorisation, backup and restore, and GDPR Art. 32 cooperation, and I
     remediated third-party penetration-test findings across the main API backend,
-    an internal app and a smaller internal service. I deploy Keycloak via Helm and
-    manage its realms, clients, groups and roles as code with the Terraform
+    an internal app and a smaller internal service. I deployed Keycloak via Helm
+    and managed its realms, clients, groups and roles as code with the Terraform
     provider.
 
   runners: >
@@ -110,32 +112,33 @@ paragraphs:
     around 45-60 seconds at the top, bounded by Karpenter node scale-up time.
 
   observability: >
-    I operate the logging and monitoring stack - Elasticsearch, Kibana, Grafana
-    and APM with Slack alerting - for production troubleshooting and incident
-    diagnosis, and I add targeted alerts as new failure modes appear, such as
-    search-Lambda error rate, pipeline queue wait time and Elasticsearch storage
-    usage. I also author Grafana dashboards rather than only reading them: my
-    teslamate-fuel-roi project ships two provision-ready dashboard JSONs over a
-    PostgreSQL datasource, with query and text-box template variables, stat,
-    gauge and timeseries panels, and analytical SQL behind the panels.
+    At BizAway I operated the logging and monitoring stack - Elasticsearch,
+    Kibana, Grafana and APM with Slack alerting - for production troubleshooting
+    and incident diagnosis, and I added targeted alerts as new failure modes
+    appeared, such as search-Lambda error rate, pipeline queue wait time and
+    Elasticsearch storage usage. I also author Grafana dashboards rather than
+    only reading them: my teslamate-fuel-roi project ships two provision-ready
+    dashboard JSONs over a PostgreSQL datasource, with query and text-box
+    template variables, stat, gauge and timeseries panels, and analytical SQL
+    behind the panels.
 
   e2e: >
-    I build end-to-end test environments with Playwright, bringing up the
-    supporting services they need - MongoDB, Redis, Elasticsearch and Kafka. I
-    also cut E2E pipeline time from around 20 minutes to around 13 minutes by
-    persisting the Docker/BuildKit cache on the self-hosted runners.
+    At BizAway I built end-to-end test environments with Playwright, bringing up
+    the supporting services they needed - MongoDB, Redis, Elasticsearch and
+    Kafka. I also cut E2E pipeline time from around 20 minutes to around 13
+    minutes by persisting the Docker/BuildKit cache on the self-hosted runners.
 
   data_stores: >
-    I operate Redis in production on AWS ElastiCache at BizAway - failover
+    I operated Redis in production on AWS ElastiCache at BizAway - failover
     behaviour, memory eviction policies and scaling strategies - and at Abika
     I deployed and managed Redis in production.
 
   platform_tooling: >
-    I build internal developer platforms rather than only operating them. I
-    designed and built a self-service QA environment manager that replaced
-    a ticketed, manual provisioning process with one-click create, suspend,
-    resume and delete of isolated environments, automating their lifecycle
-    through Flux CD and integrating Slack for deploy tracking.
+    At BizAway I built internal developer platforms rather than only operating
+    them. I designed and built a self-service QA environment manager that
+    replaced a ticketed, manual provisioning process with one-click create,
+    suspend, resume and delete of isolated environments, automating their
+    lifecycle through Flux CD and integrating Slack for deploy tracking.
 
   go_tooling: >
     I also write Go where the platform calls for it. I authored a Traefik
@@ -183,13 +186,14 @@ paragraphs:
     support to keep them unblocked.
 
   documentation: >
-    I write internal runbooks and procedures and provide developer
-    support through the internal support channel - triage, diagnosis, resolution
-    and rollback of failed releases.
+    I write runbooks and procedures - for the platforms I have run and for my
+    own infrastructure - and I have provided developer support through an
+    internal support channel: triage, diagnosis, resolution and rollback of
+    failed releases.
 
   peer_review: >
-    I review peers' changes and provide design feedback across the platform
-    team.
+    At BizAway I reviewed peers' changes and provided design feedback across the
+    platform team.
 
   homelab: >
     Outside work I run a self-hosted single-node Kubernetes cluster built with
@@ -207,7 +211,22 @@ paragraphs:
     fallback and prompt compression, alongside Cursor IDE and local models
     served by Ollama on Linux. The skills that audit this CV, draft cover
     letters and keep the CV, project list and letter facts consistent are my
-    own.
+    own, and I ship my OpenCode customisations as an installable plugin - the
+    unattended-session mode, a GitLab issue-board skill and a docs-keeping agent
+    - so it follows me across machines.
+
+  personal_infra: >
+    My own infrastructure is managed as code rather than by hand: an OpenTofu
+    estate of three stacks that manages my AWS foundation, a GitLab/GitHub
+    repository fleet and my Cloudflare zone, with S3 remote state, native state
+    locking and no credential stored in a file; and a self-hosted LLM
+    workspace reconciled by Flux behind the same Keycloak identity.
+
+  current_status: >
+    I am currently between roles, having spent the last two years owning the
+    release, image-pipeline, deployment and GitOps standards for a ~24-service
+    Kubernetes platform at BizAway. I am looking for a platform engineering role
+    where that mix of hands-on work and technical ownership is the job.
 
 # --- Closing variants ----------------------------------------------------------
 closings:
