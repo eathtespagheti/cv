@@ -14,7 +14,12 @@
 # The tag MUST track the `playwright` version in package-lock.json. A mismatch
 # means the bundled browser revision differs from the one Playwright expects.
 # Currently: playwright 1.63.0 -> chromium-1243.
-FROM mcr.microsoft.com/playwright:v1.63.0-noble AS build
+#
+# Build on the native builder platform: `dist/` is architecture-independent
+# static output, and running Playwright/Chromium under QEMU for non-native
+# targets is slow and crash-prone. Only the nginx runtime stage below is built
+# per target architecture.
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/playwright:v1.63.0-noble AS build
 
 # Canonical origin — drives <link rel=canonical>, hreflang and the sitemap.
 ARG SITE_URL=https://cv.eathtespagheti.eu
