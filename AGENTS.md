@@ -12,7 +12,7 @@ a public website, a recruiter PDF, an ATS-safe PDF, a DOCX and plain text.
 | Source | `gitlab.com/eathtespagheti/cv` (public) |
 | Live | `https://cv.eathtespagheti.eu` |
 | Hosting | home cluster — `home-cluster/flux/apps/cv/`, namespace `cv` |
-| Runs | `registry.gitlab.com/eathtespagheti/cv:v1.19.0` |
+| Runs | `registry.gitlab.com/eathtespagheti/cv:v1.20.0` |
 | Upstream | fork of `github.com/KeeGooRoomiE/cv_hub` (MIT, attribution in `LICENSE`) |
 
 ## How it works
